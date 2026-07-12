@@ -500,7 +500,7 @@ function BinderPages({ entries, ownedMap, onCardClick, photos = {} }) {
             <span style={{ fontFamily: 'Bungee, sans-serif', color: C.ink, fontSize: '12px', letterSpacing: '1px' }}>SEITE {pi + 1}</span>
             <span style={{ fontFamily: '"IBM Plex Mono", monospace', color: C.muted, fontSize: '11px' }}>{page.length}/9</span>
           </div>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
             {(() => {
               const slots = [...page];
               while (slots.length < 9) slots.push(null);
@@ -648,22 +648,22 @@ function CollectorRow({ u, badge, onClick, myCity }) {
   return (
     <button
       onClick={onClick}
-      className="flex items-center justify-between px-4 py-3 rounded-xl transition-colors hover:brightness-95 w-full"
+      className="flex items-center justify-between flex-wrap gap-2 px-4 py-3 rounded-xl transition-colors hover:brightness-95 w-full"
       style={{ background: C.surface, border: `1px solid ${C.border}` }}
     >
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 min-w-0">
         <div
-          className="w-9 h-9 rounded-full flex items-center justify-center"
+          className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
           style={{ background: C.surfaceLight, color: C.ink, fontFamily: 'Bungee, sans-serif', fontSize: '13px', border: `1px solid ${C.border}` }}
         >
           {u.name[0]}
         </div>
-        <div className="text-left">
+        <div className="text-left min-w-0">
           <div style={{ color: C.ink, fontSize: '13px', fontWeight: 600 }}>{u.name}</div>
-          <div style={{ color: C.muted, fontSize: '11px' }}>Fan von {u.club}{u.city ? ` · ${u.city}` : ''}</div>
+          <div style={{ color: C.muted, fontSize: '11px' }} className="truncate">Fan von {u.club}{u.city ? ` · ${u.city}` : ''}</div>
         </div>
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-wrap">
         {sameCity && (
           <span
             className="px-2 py-1 rounded-full flex items-center gap-1"
@@ -933,14 +933,14 @@ export default function KartenboxPrototype() {
       `}</style>
 
       {/* Nav */}
-      <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: `1px solid #E4D5A8`, background: C.bg }}>
+      <div className="flex items-center justify-between gap-2 px-3 sm:px-5 py-3 flex-wrap" style={{ borderBottom: `1px solid #E4D5A8`, background: C.bg }}>
         <div className="flex items-center gap-2">
           <div style={{ width: 12, height: 12, borderRadius: '50%', background: `radial-gradient(circle at 35% 30%, #fff, ${C.ink} 75%)`, border: `1.5px solid ${C.ink}` }} />
-          <span style={{ fontFamily: 'Bungee, sans-serif', fontSize: '20px', letterSpacing: '0.5px' }}>
+          <span style={{ fontFamily: 'Bungee, sans-serif', fontSize: '18px', letterSpacing: '0.5px' }} className="sm:text-xl">
             <span style={{ color: C.red }}>KARTEN</span><span style={{ color: C.blue }}>BOX</span>
           </span>
         </div>
-        <div className="flex items-center gap-1 rounded-full p-1" style={{ background: C.surfaceLight }}>
+        <div className="flex items-center gap-1 rounded-full p-1 overflow-x-auto" style={{ background: C.surfaceLight, maxWidth: '100%' }}>
           {[
             { key: 'sammlung', label: 'Meine Sammlung', icon: LayoutGrid },
             { key: 'entdecken', label: 'Entdecken', icon: Users },
@@ -950,7 +950,7 @@ export default function KartenboxPrototype() {
             <button
               key={key}
               onClick={() => { setView(key); setSelectedCollector(null); }}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-colors"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full transition-colors flex-shrink-0"
               style={{
                 background: view === key ? C.blue : 'transparent',
                 color: view === key ? '#FFFCF2' : C.muted,
@@ -958,21 +958,21 @@ export default function KartenboxPrototype() {
                 fontWeight: 600,
               }}
             >
-              <Icon size={13} />
-              {label}
+              <Icon size={15} />
+              <span className="hidden sm:inline">{label}</span>
             </button>
           ))}
         </div>
         <button
           onClick={() => { setView('profil'); setSelectedCollector(null); }}
-          className="w-8 h-8 rounded-full flex items-center justify-center"
+          className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
           style={{ background: C.gold, color: C.ink, fontFamily: 'Bungee, sans-serif', fontSize: '12px', border: `1.5px solid ${C.ink}` }}
         >
           {(profile.firstName[0] || '') + (profile.lastName[0] || '')}
         </button>
       </div>
 
-      <div className="max-w-5xl mx-auto px-5 py-6">
+      <div className="max-w-5xl mx-auto px-3 sm:px-5 py-6">
         {view === 'sammlung' && (
           <>
             <div className="flex flex-wrap items-center gap-3 mb-6">
@@ -1105,7 +1105,7 @@ export default function KartenboxPrototype() {
 
         {view === 'hinzufuegen' && (
           <div className="flex flex-col gap-5 max-w-lg">
-            <div className="flex items-center gap-1 rounded-full p-1 w-fit" style={{ background: C.surfaceLight, border: `1px solid ${C.border}` }}>
+            <div className="flex items-center gap-1 rounded-full p-1 w-fit flex-wrap" style={{ background: C.surfaceLight, border: `1px solid ${C.border}` }}>
               {[
                 { key: 'einzeln', label: 'Einzeln hinzufügen' },
                 { key: 'checkliste', label: 'Ganzes Set abhaken' },
@@ -1331,7 +1331,7 @@ export default function KartenboxPrototype() {
                   />
                 </div>
 
-                <div className="flex items-center gap-1 rounded-full p-1 w-fit" style={{ background: C.surfaceLight, border: `1px solid ${C.border}` }}>
+                <div className="flex items-center gap-1 rounded-full p-1 w-fit flex-wrap" style={{ background: C.surfaceLight, border: `1px solid ${C.border}` }}>
                   {[
                     { key: 'ohne', label: 'Ohne Autogramm' },
                     { key: 'mit', label: 'Mit Autogramm' },
@@ -1526,14 +1526,14 @@ export default function KartenboxPrototype() {
       {/* Detail modal */}
       {selectedEntry && (
         <div
-          className="fixed inset-0 flex items-center justify-center p-6 z-50"
+          className="fixed inset-0 flex items-center justify-center p-3 sm:p-6 z-50"
           style={{ background: 'rgba(0,0,0,0.6)' }}
           onClick={() => setSelectedEntry(null)}
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="rounded-2xl p-5 w-full max-w-sm"
-            style={{ background: C.surface, border: '1px solid #DFC98D' }}
+            className="rounded-2xl p-5 w-full max-w-sm overflow-y-auto"
+            style={{ background: C.surface, border: '1px solid #DFC98D', maxHeight: '90vh' }}
           >
             <div className="flex items-center justify-between mb-3">
               <span style={{ fontFamily: 'Bungee, sans-serif', color: C.ink, fontSize: '15px' }}>{selectedEntry.player}</span>
