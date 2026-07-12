@@ -84,6 +84,22 @@ const PARALLEL_COLORS = {
   'Red Refractor': '#C1272D',
 };
 
+// Echte Gesamtauflagen je Parallel-Stufe (Topps Chrome Bundesliga 25/26). SuperFractor ist
+// immer 1/1. Bei allen anderen Seltenheiten (Wave Refractor, FrozenFractor, Insert-Sets,
+// Autograph) variiert die Auflage je Karte, deshalb dort keine feste Vorgabe.
+const FIXED_PRINT_RUNS = {
+  'Aqua Refractor': 199,
+  'Blue Refractor': 150,
+  'Green Refractor': 99,
+  'Purple Refractor': 75,
+  'ToppsFractor': 52,
+  'Gold Refractor': 50,
+  'Orange Refractor': 25,
+  'Black Refractor': 10,
+  'Red Refractor': 5,
+  'SuperFractor': 1,
+};
+
 // Größte Anbieter für Fußball-Sammelkarten + ihre wichtigsten Sets der letzten Saisons.
 // Topps hält die offizielle Bundesliga-Lizenz seit 2008/09 sowie UEFA Champions League;
 // Panini ist der zweite große Anbieter (Adrenalyn XL, Prizm, Donruss/Optic, Top Class).
@@ -119,8 +135,7 @@ const HARRY_KANE_AUTO = generateSerialFamily({
 
 // Quelle: checklistinsider.com, "2025-26 Topps Chrome Bundesliga Soccer Checklist Guide"
 // (Stand 07.05.2026) — komplettes Base Set, 100 Karten.
-const CATALOGUE = [
-  ...HARRY_KANE_AUTO,
+const BASE_CARDS = [
   { id: 'tcb2526-1', player: 'Chrislain Matsima', club: 'FC Augsburg', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 1, print: 100, auto: false, rookie: false },
   { id: 'tcb2526-2', player: 'Mert Kömür', club: 'FC Augsburg', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 2, print: 100, auto: false, rookie: false },
   { id: 'tcb2526-3', player: 'Alexis Claude-Maurice', club: 'FC Augsburg', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 3, print: 100, auto: false, rookie: false },
@@ -137,12 +152,12 @@ const CATALOGUE = [
   { id: 'tcb2526-14', player: 'Patrice Čović', club: 'SV Werder Bremen', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 14, print: 100, auto: false, rookie: true },
   { id: 'tcb2526-15', player: 'Cameron Puertas', club: 'SV Werder Bremen', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 15, print: 100, auto: false, rookie: false },
   { id: 'tcb2526-16', player: 'Daniel Svensson', club: 'Borussia Dortmund', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 16, print: 100, auto: false, rookie: true },
-  { id: 'tcb2526-17', player: 'Nico Schlotterbeck', club: 'Borussia Dortmund', pos: '', season: '2025/26', setId: 's1', rarity: 'Blue Refractor /150', num: 87, print: 150, auto: false, rookie: false },
-  { id: 'tcb2526-18', player: 'Jobe Bellingham', club: 'Borussia Dortmund', pos: '', season: '2025/26', setId: 's1', rarity: 'Red Refractor /5', num: 2, print: 5, auto: false, rookie: true },
-  { id: 'tcb2526-19', player: 'Karim Adeyemi', club: 'Borussia Dortmund', pos: '', season: '2025/26', setId: 's1', rarity: 'Blue Wave Refractor /150', num: 63, print: 150, auto: false, rookie: false },
+  { id: 'tcb2526-17', player: 'Nico Schlotterbeck', club: 'Borussia Dortmund', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 17, print: 100, auto: false, rookie: false },
+  { id: 'tcb2526-18', player: 'Jobe Bellingham', club: 'Borussia Dortmund', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 18, print: 100, auto: false, rookie: true },
+  { id: 'tcb2526-19', player: 'Karim Adeyemi', club: 'Borussia Dortmund', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 19, print: 100, auto: false, rookie: false },
   { id: 'tcb2526-20', player: 'Ousmane Diallo', club: 'Borussia Dortmund', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 20, print: 100, auto: false, rookie: true },
   { id: 'tcb2526-21', player: 'Carney Chukwuemeka', club: 'Borussia Dortmund', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 21, print: 100, auto: false, rookie: false },
-  { id: 'tcb2526-22', player: 'Serhou Guirassy', club: 'Borussia Dortmund', pos: '', season: '2025/26', setId: 's1', rarity: 'Orange Refractor /25', num: 9, print: 25, auto: false, rookie: false },
+  { id: 'tcb2526-22', player: 'Serhou Guirassy', club: 'Borussia Dortmund', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 22, print: 100, auto: false, rookie: false },
   { id: 'tcb2526-23', player: 'Nathaniel Brown', club: 'Eintracht Frankfurt', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 23, print: 100, auto: false, rookie: false },
   { id: 'tcb2526-24', player: 'Ritsu Doan', club: 'Eintracht Frankfurt', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 24, print: 100, auto: false, rookie: false },
   { id: 'tcb2526-25', player: 'Hugo Larsson', club: 'Eintracht Frankfurt', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 25, print: 100, auto: false, rookie: false },
@@ -178,14 +193,14 @@ const CATALOGUE = [
   { id: 'tcb2526-55', player: 'Rômulo Cardoso', club: 'RB Leipzig', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 55, print: 100, auto: false, rookie: true },
   { id: 'tcb2526-56', player: 'Ezechiel Banzuzi', club: 'RB Leipzig', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 56, print: 100, auto: false, rookie: true },
   { id: 'tcb2526-57', player: 'Assan Ouedraogo', club: 'RB Leipzig', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 57, print: 100, auto: false, rookie: false },
-  { id: 'tcb2526-58', player: 'Johan Bakayoko', club: 'RB Leipzig', pos: '', season: '2025/26', setId: 's1', rarity: 'FrozenFractor', num: 1, print: 5, auto: false, rookie: false },
-  { id: 'tcb2526-59', player: 'Yan Diomande', club: 'RB Leipzig', pos: '', season: '2025/26', setId: 's1', rarity: 'Green Refractor /99', num: 34, print: 99, auto: false, rookie: true },
+  { id: 'tcb2526-58', player: 'Johan Bakayoko', club: 'RB Leipzig', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 58, print: 100, auto: false, rookie: false },
+  { id: 'tcb2526-59', player: 'Yan Diomande', club: 'RB Leipzig', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 59, print: 100, auto: false, rookie: true },
   { id: 'tcb2526-60', player: 'Conrad Harder', club: 'RB Leipzig', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 60, print: 100, auto: false, rookie: false },
   { id: 'tcb2526-61', player: 'Antonio Nusa', club: 'RB Leipzig', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 61, print: 100, auto: false, rookie: false },
   { id: 'tcb2526-62', player: 'Jarell Quansah', club: 'Bayer 04 Leverkusen', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 62, print: 100, auto: false, rookie: false },
   { id: 'tcb2526-63', player: 'Axel Tape', club: 'Bayer 04 Leverkusen', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 63, print: 100, auto: false, rookie: true },
   { id: 'tcb2526-64', player: 'Ernest Poku', club: 'Bayer 04 Leverkusen', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 64, print: 100, auto: false, rookie: true },
-  { id: 'tcb2526-65', player: 'Malik Tillman', club: 'Bayer 04 Leverkusen', pos: '', season: '2025/26', setId: 's1', rarity: 'ToppsFractor /52', num: 18, print: 52, auto: false, rookie: false },
+  { id: 'tcb2526-65', player: 'Malik Tillman', club: 'Bayer 04 Leverkusen', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 65, print: 100, auto: false, rookie: false },
   { id: 'tcb2526-66', player: 'Eliesse Ben Seghir', club: 'Bayer 04 Leverkusen', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 66, print: 100, auto: false, rookie: false },
   { id: 'tcb2526-67', player: 'Christian Kofane', club: 'Bayer 04 Leverkusen', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 67, print: 100, auto: false, rookie: true },
   { id: 'tcb2526-68', player: 'Claudio Echeverri', club: 'Bayer 04 Leverkusen', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 68, print: 100, auto: false, rookie: true },
@@ -201,10 +216,10 @@ const CATALOGUE = [
   { id: 'tcb2526-78', player: 'Tim Kleindienst', club: 'Borussia Mönchengladbach', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 78, print: 100, auto: false, rookie: false },
   { id: 'tcb2526-79', player: 'Nicolas Jackson', club: 'FC Bayern München', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 79, print: 100, auto: false, rookie: false },
   { id: 'tcb2526-80', player: 'Michael Olise', club: 'FC Bayern München', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 80, print: 100, auto: false, rookie: false },
-  { id: 'tcb2526-81', player: 'Jamal Musiala', club: 'FC Bayern München', pos: '', season: '2025/26', setId: 's1', rarity: 'Aqua Refractor /199', num: 156, print: 199, auto: false, rookie: false },
-  { id: 'tcb2526-82', player: 'Lennart Karl', club: 'FC Bayern München', pos: '', season: '2025/26', setId: 's1', rarity: 'SuperFractor 1/1', num: 1, print: 1, auto: false, rookie: true },
+  { id: 'tcb2526-81', player: 'Jamal Musiala', club: 'FC Bayern München', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 81, print: 100, auto: false, rookie: false },
+  { id: 'tcb2526-82', player: 'Lennart Karl', club: 'FC Bayern München', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 82, print: 100, auto: false, rookie: true },
   { id: 'tcb2526-83', player: 'Luis Díaz', club: 'FC Bayern München', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 83, print: 100, auto: false, rookie: false },
-  { id: 'tcb2526-84', player: 'Harry Kane', club: 'FC Bayern München', pos: 'ST', season: '2025/26', setId: 's1', rarity: 'Gold Refractor /50', num: 12, print: 50, auto: false, rookie: false },
+  { id: 'tcb2526-84', player: 'Harry Kane', club: 'FC Bayern München', pos: 'ST', season: '2025/26', setId: 's1', rarity: 'Base', num: 84, print: 100, auto: false, rookie: false },
   { id: 'tcb2526-85', player: 'Joshua Kimmich', club: 'FC St. Pauli', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 85, print: 100, auto: false, rookie: false },
   { id: 'tcb2526-86', player: 'Eric Smith', club: 'FC St. Pauli', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 86, print: 100, auto: false, rookie: false },
   { id: 'tcb2526-87', player: 'Louis Oppie', club: 'FC St. Pauli', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 87, print: 100, auto: false, rookie: true },
@@ -216,22 +231,90 @@ const CATALOGUE = [
   { id: 'tcb2526-93', player: 'Finn Jeltsch', club: 'VfB Stuttgart', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 93, print: 100, auto: false, rookie: true },
   { id: 'tcb2526-94', player: 'Lazar Jovanović', club: 'VfB Stuttgart', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 94, print: 100, auto: false, rookie: true },
   { id: 'tcb2526-95', player: 'Bilal El Khannouss', club: 'VfB Stuttgart', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 95, print: 100, auto: false, rookie: false },
-  { id: 'tcb2526-96', player: 'Konstantinos Koulierakis', club: 'VfL Wolfsburg', pos: '', season: '2025/26', setId: 's1', rarity: 'Purple Refractor /75', num: 41, print: 75, auto: false, rookie: false },
+  { id: 'tcb2526-96', player: 'Konstantinos Koulierakis', club: 'VfL Wolfsburg', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 96, print: 100, auto: false, rookie: false },
   { id: 'tcb2526-97', player: 'Vinicius Souza', club: 'VfL Wolfsburg', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 97, print: 100, auto: false, rookie: false },
   { id: 'tcb2526-98', player: 'Mohammed Amoura', club: 'VfL Wolfsburg', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 98, print: 100, auto: false, rookie: false },
   { id: 'tcb2526-99', player: 'Adam Daghim', club: 'VfL Wolfsburg', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 99, print: 100, auto: false, rookie: false },
   { id: 'tcb2526-100', player: 'Christian Eriksen', club: 'VfL Wolfsburg', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 100, print: 100, auto: false, rookie: false },
+  // Von Nutzer per Foto bestätigt (Orange Refractor Autograph 02/25) — fehlte in der ursprünglich
+  // recherchierten Checkliste, gehört aber nachweislich zum Set.
+  { id: 'tcb2526-101', player: 'Mario Götze', club: 'Eintracht Frankfurt', pos: '', season: '2025/26', setId: 's1', rarity: 'Base', num: 101, print: 100, auto: false, rookie: false },
 ];
+
+// Jede der 100 Base-Karten existiert real auch als Refractor-Parallele in mehreren Farbstufen
+// bis hin zur SuperFractor 1/1 — genau wie in einer echten Chrome-Box. Die Seriennummer einer
+// Parallele ist beim Ziehen aus der Packung zufällig, deshalb starten sie als "?" (baseNum
+// verweist weiterhin auf die Checklisten-Position) und lässt sich beim Hinzufügen eintragen.
+const REFRACTOR_TIERS = [
+  { name: 'Aqua Refractor', print: 199 },
+  { name: 'Blue Refractor', print: 150 },
+  { name: 'Green Refractor', print: 99 },
+  { name: 'Purple Refractor', print: 75 },
+  { name: 'ToppsFractor', print: 52 },
+  { name: 'Gold Refractor', print: 50 },
+  { name: 'Orange Refractor', print: 25 },
+  { name: 'Black Refractor', print: 10 },
+  { name: 'Red Refractor', print: 5 },
+  { name: 'SuperFractor', print: 1 },
+  { name: 'FrozenFractor', print: null },
+];
+
+function expandParallels(baseCards, tiers) {
+  const out = [];
+  baseCards.forEach((card) => {
+    tiers.forEach((tier) => {
+      const slug = tier.name.replace(/\s+/g, '').toLowerCase();
+      out.push({
+        ...card,
+        id: `${card.id}-${slug}`,
+        rarity: tier.name,
+        num: tier.print === 1 ? 1 : null,
+        baseNum: card.num,
+        print: tier.print,
+      });
+    });
+  });
+  return out;
+}
+
+const CATALOGUE = [...HARRY_KANE_AUTO, ...BASE_CARDS, ...expandParallels(BASE_CARDS, REFRACTOR_TIERS)];
+
+// Für die Demo-Sammlung legen wir ein paar konkret gezogene Exemplare an — in der echten App
+// passiert das, sobald ein Nutzer seine Karte hinzufügt bzw. die Seriennummer einträgt.
+function pushKnownSerial(baseId, tierName, serialNum, auto = false) {
+  const base = BASE_CARDS.find((c) => c.id === baseId);
+  const tier = REFRACTOR_TIERS.find((t) => t.name === tierName);
+  if (!base || !tier) return;
+  const slug = tierName.replace(/\s+/g, '').toLowerCase();
+  const id = `${baseId}-${slug}-${serialNum}${auto ? '-auto' : ''}`;
+  CATALOGUE.push({ ...base, id, rarity: tierName, num: serialNum, baseNum: base.num, print: tier.print, auto });
+}
+pushKnownSerial('tcb2526-84', 'Gold Refractor', 12);
+pushKnownSerial('tcb2526-18', 'Red Refractor', 2);
+pushKnownSerial('tcb2526-59', 'Green Refractor', 34);
+pushKnownSerial('tcb2526-96', 'Purple Refractor', 41);
+pushKnownSerial('tcb2526-82', 'SuperFractor', 1);
+// Jamal Musiala: zwei verschiedene Orange-Refractor-Exemplare ohne Autogramm...
+pushKnownSerial('tcb2526-81', 'Orange Refractor', 11);
+pushKnownSerial('tcb2526-81', 'Orange Refractor', 20);
+// ...plus dieselbe Seriennummer 11/25 zusätzlich als eigene Autogramm-Version — genau das
+// Mario-Götze-Beispiel: gleiche Auflage, aber zwei unterscheidbare physische Karten.
+pushKnownSerial('tcb2526-81', 'Orange Refractor', 11, true);
+// Die reale Karte, die der Nutzer besitzt: Mario Götze, Orange Refractor Autograph, 02/25
+pushKnownSerial('tcb2526-101', 'Orange Refractor', 2, true);
 
 const setById = (id) => SETS.find((s) => s.id === id);
 
 const MY_OWNED = [
-  { id: 'tcb2526-84', cond: 'PSA 10', price: 45, estValue: 68, sellPrice: 60, isPublic: true },
-  { id: 'tcb2526-82', cond: 'PSA 9', price: 38, estValue: 210, sellPrice: null, isPublic: true },
-  { id: 'tcb2526-18', cond: 'Roh / ungeprüft', price: 6, estValue: 9, sellPrice: null, isPublic: true },
-  { id: 'tcb2526-59', cond: 'PSA 9', price: 12, estValue: 15, sellPrice: 20, isPublic: true },
-  { id: 'tcb2526-22', cond: 'Roh / ungeprüft', price: 5, estValue: 4, sellPrice: null, isPublic: true },
-  { id: 'tcb2526-96', cond: 'Roh / ungeprüft', price: 3, estValue: 3, sellPrice: null, isPublic: true },
+  { id: 'tcb2526-84-goldrefractor-12', cond: 'PSA 10', price: 45, estValue: 68, sellPrice: 60, isPublic: true },
+  { id: 'tcb2526-82-superfractor-1', cond: 'PSA 9', price: 38, estValue: 210, sellPrice: null, isPublic: true },
+  { id: 'tcb2526-18-redrefractor-2', cond: 'Roh / ungeprüft', price: 6, estValue: 9, sellPrice: null, isPublic: true },
+  { id: 'tcb2526-59-greenrefractor-34', cond: 'PSA 9', price: 12, estValue: 15, sellPrice: 20, isPublic: true },
+  { id: 'tcb2526-81-orangerefractor-11', cond: 'Roh / ungeprüft', price: 5, estValue: 6, sellPrice: null, isPublic: true },
+  { id: 'tcb2526-81-orangerefractor-20', cond: 'PSA 8', price: 7, estValue: 8, sellPrice: null, isPublic: true },
+  { id: 'tcb2526-81-orangerefractor-11-auto', cond: 'PSA 9', price: 65, estValue: 95, sellPrice: null, isPublic: true },
+  { id: 'tcb2526-101-orangerefractor-2-auto', cond: 'Roh / ungeprüft', price: 0, estValue: 0, sellPrice: null, isPublic: true },
+  { id: 'tcb2526-96-purplerefractor-41', cond: 'Roh / ungeprüft', price: 3, estValue: 3, sellPrice: null, isPublic: true },
   { id: 'hk-auto-1', cond: 'PSA 10', price: 890, estValue: 1450, sellPrice: null, isPublic: false },
 ];
 
@@ -242,6 +325,14 @@ const OTHERS = [
   { id: 'u4', name: 'Jonas P.', club: 'FC Bayern München', city: 'Würzburg', owned: ['tcb2526-79', 'tcb2526-80', 'tcb2526-83', 'tcb2526-84', 'hk-auto-7'] },
   { id: 'u5', name: 'Miriam T.', club: 'Eintracht Frankfurt', city: 'Frankfurt am Main', owned: ['tcb2526-23', 'tcb2526-24', 'tcb2526-27', 'tcb2526-28', 'tcb2526-25'] },
 ];
+
+// Formatiert Seriennummer/Auflage null-sicher — frisch generierte Parallelen kennen ihre
+// gezogene Nummer noch nicht ("?"), bis der Nutzer sie beim Hinzufügen einträgt.
+function formatSerial(entry) {
+  const numPart = entry.num != null ? `#${String(entry.num).padStart(3, '0')}` : '#?';
+  const printPart = entry.print != null ? `/${entry.print}` : '';
+  return numPart + printPart;
+}
 
 function rarityStyle(rarity, auto) {
   if (auto || rarity.includes('SuperFractor') || rarity === 'FrozenFractor') {
@@ -359,7 +450,7 @@ function Card({ entry, owned, onClick, photo }) {
             : { background: 'rgba(28,26,21,0.08)', fontFamily: '"IBM Plex Mono", monospace', fontSize: '10px', color: C.muted }
         }
       >
-        <span>#{String(entry.num).padStart(3, '0')}/{entry.print}</span>
+        <span>{formatSerial(entry)}</span>
         {owned && owned.price != null && <span style={{ color: C.gold }}>€{owned.price}</span>}
       </div>
     </button>
@@ -506,7 +597,7 @@ function SimpleMatchRow({ entry, ownedMap, othersList, onViewCollector }) {
       <div>
         <div style={{ color: C.ink, fontSize: '13px' }}>{entry.player} · {entry.club}</div>
         <div style={{ color: C.muted, fontSize: '11px' }}>
-          {setById(entry.setId)?.name} · #{String(entry.num).padStart(2, '0')}/{entry.print}{entry.auto ? ' · Autograph' : ''}
+          {setById(entry.setId)?.name} · {formatSerial(entry)}{entry.auto ? ' · Autograph' : ''}
         </div>
       </div>
       {owner?.mine && <span style={{ color: C.gold, fontSize: '11px', fontWeight: 600 }}>In deiner Sammlung</span>}
@@ -533,12 +624,19 @@ function ChecklistRow({ entry, checked, disabled, onToggle }) {
         cursor: disabled ? 'default' : 'pointer',
       }}
     >
-      <input type="checkbox" checked={checked} disabled={disabled} onChange={() => onToggle(entry.id)} />
+      <input type="checkbox" checked={checked} disabled={disabled} onChange={() => onToggle(entry)} />
       <span style={{ width: 8, height: 8, borderRadius: '50%', background: club?.p || C.muted, flexShrink: 0 }} />
-      <span style={{ fontFamily: '"IBM Plex Mono", monospace', color: C.muted, width: '30px', flexShrink: 0 }}>
-        #{String(entry.num).padStart(3, '0')}
+      <span style={{ fontFamily: '"IBM Plex Mono", monospace', color: C.muted, width: '48px', flexShrink: 0 }}>
+        {entry.print > 1 && entry.baseNum != null && entry.num != null
+          ? `${entry.num}/${entry.print}`
+          : `#${String(entry.baseNum ?? entry.num).padStart(3, '0')}`}
       </span>
       <span style={{ color: C.ink, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{entry.player}</span>
+      {entry.auto && (
+        <span className="px-1.5 py-0.5 rounded" style={{ background: C.red, color: '#FFFCF2', fontFamily: 'Bungee, sans-serif', fontSize: '8px', flexShrink: 0 }}>
+          AUTO
+        </span>
+      )}
       {entry.rarity !== 'Base' && <span style={{ color: C.muted, fontSize: '10px', flexShrink: 0 }}>{entry.rarity}</span>}
       {disabled && <span style={{ color: C.green, fontSize: '10px', flexShrink: 0 }}>✓ besitzt du</span>}
     </label>
@@ -625,9 +723,11 @@ export default function KartenboxPrototype() {
   const [addMode, setAddMode] = useState('einzeln');
   const [bulkSetId, setBulkSetId] = useState(SETS[0].id);
   const [bulkRarity, setBulkRarity] = useState('Base');
+  const [bulkPlayerSearch, setBulkPlayerSearch] = useState('');
+  const [bulkAuto, setBulkAuto] = useState('ohne');
   const [bulkSelected, setBulkSelected] = useState({});
   const [shuffleSeed, setShuffleSeed] = useState(0);
-  const [addForm, setAddForm] = useState({ player: '', season: '2025/26', setId: SETS[0].id, rarity: 'Base', auto: false, price: '', sellPrice: '', isPublic: true });
+  const [addForm, setAddForm] = useState({ player: '', season: '2025/26', setId: SETS[0].id, rarity: 'Base', serialNum: '', serialTotal: '', auto: false, price: '', sellPrice: '', isPublic: true });
   const detectedClub = useMemo(() => {
     const match = CATALOGUE.find((c) => c.player.toLowerCase() === addForm.player.trim().toLowerCase());
     return match?.club || '';
@@ -690,22 +790,72 @@ export default function KartenboxPrototype() {
     setSelectedCollector(collector);
   }
 
-  const bulkList = useMemo(
-    () => CATALOGUE
-      .filter((c) => c.setId === bulkSetId && (bulkRarity === 'Alle' || c.rarity.includes(bulkRarity)))
-      .sort((a, b) => a.num - b.num),
-    [bulkSetId, bulkRarity]
-  );
-  const bulkSelectedCount = Object.values(bulkSelected).filter(Boolean).length;
+  const bulkList = useMemo(() => {
+    const q = bulkPlayerSearch.trim().toLowerCase();
+    const baseMatches = BASE_CARDS.filter((c) => c.setId === bulkSetId && (!q || c.player.toLowerCase().includes(q)));
+    const autoFlags = bulkAuto === 'beide' ? [false, true] : [bulkAuto === 'mit'];
 
-  function toggleBulk(id) {
-    setBulkSelected((prev) => ({ ...prev, [id]: !prev[id] }));
+    if (bulkRarity === 'Base') {
+      const rows = [];
+      baseMatches.forEach((c) => {
+        autoFlags.forEach((auto) => rows.push({ ...c, id: auto ? `${c.id}-auto` : c.id, auto }));
+      });
+      return rows.sort((a, b) => a.num - b.num);
+    }
+
+    const tier = REFRACTOR_TIERS.find((t) => t.name === bulkRarity);
+    if (!tier) {
+      // Wave Refractor, Insert-Sets, Autograph, 'Alle': noch nicht systematisch generiert —
+      // zeige, was dafür schon real im Katalog existiert (z. B. Autogramm-Serie, manuelle Karten).
+      return CATALOGUE
+        .filter((c) => c.setId === bulkSetId && (bulkRarity === 'Alle' || c.rarity === bulkRarity) && (!q || c.player.toLowerCase().includes(q)))
+        .filter((c) => bulkAuto === 'beide' || c.auto === (bulkAuto === 'mit'))
+        .sort((a, b) => (a.num || 0) - (b.num || 0));
+    }
+
+    const slug = tier.name.replace(/\s+/g, '').toLowerCase();
+    const expandSerials = tier.print > 1 && q.length > 0;
+
+    if (!expandSerials) {
+      // Übersicht: eine Zeile pro Spieler (und Autogramm-Variante), Seriennummer noch offen
+      const rows = [];
+      baseMatches.forEach((c) => {
+        autoFlags.forEach((auto) => {
+          const id = `${c.id}-${slug}${auto ? '-auto' : ''}`;
+          rows.push({ ...c, id, rarity: tier.name, num: tier.print === 1 ? 1 : null, baseNum: c.num, print: tier.print, auto });
+        });
+      });
+      return rows;
+    }
+
+    // Auf einen Spieler eingegrenzt + nummerierte Parallele -> alle Exemplare 1..N einzeln,
+    // je Autogramm-Variante als eigene, unterscheidbare Karte
+    const rows = [];
+    baseMatches.forEach((c) => {
+      for (let n = 1; n <= tier.print; n++) {
+        autoFlags.forEach((auto) => {
+          const id = `${c.id}-${slug}-${n}${auto ? '-auto' : ''}`;
+          rows.push({ ...c, id, rarity: tier.name, num: n, baseNum: c.num, print: tier.print, auto });
+        });
+      }
+    });
+    return rows;
+  }, [bulkSetId, bulkRarity, bulkPlayerSearch, bulkAuto]);
+  const bulkSelectedCount = Object.keys(bulkSelected).length;
+
+  function toggleBulk(entry) {
+    setBulkSelected((prev) => {
+      const next = { ...prev };
+      if (next[entry.id]) delete next[entry.id];
+      else next[entry.id] = entry;
+      return next;
+    });
   }
 
   function selectAllVisible() {
     setBulkSelected((prev) => {
       const next = { ...prev };
-      bulkList.forEach((c) => { if (!ownedMap[c.id]) next[c.id] = true; });
+      bulkList.forEach((c) => { if (!ownedMap[c.id]) next[c.id] = c; });
       return next;
     });
   }
@@ -719,11 +869,14 @@ export default function KartenboxPrototype() {
   }
 
   function submitBulkUpload() {
-    const idsToAdd = bulkList.filter((c) => bulkSelected[c.id] && !ownedMap[c.id]).map((c) => c.id);
-    if (idsToAdd.length === 0) return;
+    const toAdd = Object.values(bulkSelected).filter((c) => !ownedMap[c.id]);
+    if (toAdd.length === 0) return;
+    toAdd.forEach((c) => {
+      if (!CATALOGUE.find((existing) => existing.id === c.id)) CATALOGUE.push(c);
+    });
     setOwned((prev) => [
       ...prev,
-      ...idsToAdd.map((id) => ({ id, cond: 'Roh / ungeprüft', price: 0, estValue: 0, sellPrice: null, isPublic: true })),
+      ...toAdd.map((c) => ({ id: c.id, cond: 'Roh / ungeprüft', price: 0, estValue: 0, sellPrice: null, isPublic: true })),
     ]);
     setBulkSelected({});
   }
@@ -758,6 +911,13 @@ export default function KartenboxPrototype() {
 
   function updateSellPrice(id, value) {
     setOwned((prev) => prev.map((o) => (o.id === id ? { ...o, sellPrice: value === '' ? null : Number(value) } : o)));
+  }
+
+  function updateSerialNum(id, value) {
+    const entry = CATALOGUE.find((c) => c.id === id);
+    if (!entry) return;
+    entry.num = value === '' ? null : Number(value);
+    setSelectedEntry((prev) => (prev && prev.id === id ? { ...prev, num: entry.num } : prev));
   }
 
   const clubOptions = ['Alle', ...Object.keys(CLUBS)];
@@ -984,7 +1144,7 @@ export default function KartenboxPrototype() {
                         <div>
                           <div style={{ color: C.ink, fontSize: '13px' }}>{r.player} · {r.club}</div>
                           <div style={{ color: C.muted, fontSize: '11px' }}>
-                            {setById(r.setId)?.name} · #{String(r.num).padStart(2, '0')}/{r.print}{r.auto ? ' · Autograph' : ''}
+                            {setById(r.setId)?.name} · {formatSerial(r)}{r.auto ? ' · Autograph' : ''}
                           </div>
                         </div>
                         {ownedMap[r.id] ? (
@@ -1035,12 +1195,52 @@ export default function KartenboxPrototype() {
                 </select>
                 <select
                   value={addForm.rarity}
-                  onChange={(e) => setAddForm({ ...addForm, rarity: e.target.value })}
+                  onChange={(e) => {
+                    const r = e.target.value;
+                    const fixed = FIXED_PRINT_RUNS[r];
+                    setAddForm({
+                      ...addForm,
+                      rarity: r,
+                      serialTotal: fixed ? String(fixed) : '',
+                      serialNum: r === 'SuperFractor' ? '1' : '',
+                    });
+                  }}
                   className="px-3 py-2 rounded-lg text-sm col-span-2"
                   style={{ background: C.surfaceLight, color: C.ink, border: '1px solid #DFC98D' }}
                 >
                   {RARITY_ORDER.map((r) => <option key={r} value={r}>{r}</option>)}
                 </select>
+                {addForm.rarity !== 'Base' && (
+                  <div className="col-span-2 flex items-end gap-2">
+                    <div className="flex-1">
+                      <label style={{ color: C.muted, fontSize: '10px' }}>Seriennummer</label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={addForm.serialNum}
+                        disabled={addForm.rarity === 'SuperFractor'}
+                        onChange={(e) => setAddForm({ ...addForm, serialNum: e.target.value })}
+                        placeholder="z. B. 21"
+                        className="w-full px-3 py-2 rounded-lg text-sm mt-1"
+                        style={{ background: C.surfaceLight, color: C.ink, border: '1px solid #DFC98D' }}
+                      />
+                    </div>
+                    <span style={{ color: C.muted, paddingBottom: '10px' }}>/</span>
+                    <div className="flex-1">
+                      <label style={{ color: C.muted, fontSize: '10px' }}>Gesamtauflage</label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={addForm.serialTotal}
+                        disabled={!!FIXED_PRINT_RUNS[addForm.rarity]}
+                        onChange={(e) => setAddForm({ ...addForm, serialTotal: e.target.value })}
+                        placeholder="z. B. 50"
+                        className="w-full px-3 py-2 rounded-lg text-sm mt-1"
+                        style={{ background: C.surfaceLight, color: C.ink, border: '1px solid #DFC98D', opacity: FIXED_PRINT_RUNS[addForm.rarity] ? 0.7 : 1 }}
+                      />
+                    </div>
+                  </div>
+                )}
                 <input
                   placeholder="Ankaufspreis (€)"
                   value={addForm.price}
@@ -1081,9 +1281,12 @@ export default function KartenboxPrototype() {
                 disabled={!addForm.player.trim()}
                 onClick={() => {
                   const id = 'custom-' + Date.now();
-                  CATALOGUE.push({ id, player: addForm.player, club: detectedClub || 'Unbekannter Verein', pos: '', season: addForm.season, setId: addForm.setId, rarity: addForm.rarity, num: CATALOGUE.length + 1, print: addForm.rarity === 'Base' ? 100 : 1, auto: addForm.auto });
+                  const isBase = addForm.rarity === 'Base';
+                  const num = isBase ? CATALOGUE.length + 1 : (Number(addForm.serialNum) || 1);
+                  const print = isBase ? 100 : (Number(addForm.serialTotal) || FIXED_PRINT_RUNS[addForm.rarity] || 1);
+                  CATALOGUE.push({ id, player: addForm.player, club: detectedClub || 'Unbekannter Verein', pos: '', season: addForm.season, setId: addForm.setId, rarity: addForm.rarity, num, print, auto: addForm.auto });
                   setOwned((prev) => [...prev, { id, cond: 'Roh / ungeprüft', price: Number(addForm.price) || 0, estValue: Number(addForm.price) || 0, sellPrice: addForm.sellPrice === '' ? null : Number(addForm.sellPrice), isPublic: addForm.isPublic }]);
-                  setAddForm({ player: '', season: '2025/26', setId: SETS[0].id, rarity: 'Base', auto: false, price: '', sellPrice: '', isPublic: true });
+                  setAddForm({ player: '', season: '2025/26', setId: SETS[0].id, rarity: 'Base', serialNum: '', serialTotal: '', auto: false, price: '', sellPrice: '', isPublic: true });
                   setSearch('');
                 }}
                 className="mt-3 w-full py-2 rounded-lg text-sm font-semibold"
@@ -1116,6 +1319,40 @@ export default function KartenboxPrototype() {
                     {RARITY_ORDER.map((r) => <option key={r} value={r}>{r}</option>)}
                   </select>
                 </div>
+
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: C.surfaceLight, border: `1px solid ${C.border}` }}>
+                  <Search size={14} color={C.muted} />
+                  <input
+                    value={bulkPlayerSearch}
+                    onChange={(e) => setBulkPlayerSearch(e.target.value)}
+                    placeholder="Nach Spieler filtern, z. B. Musiala"
+                    className="bg-transparent flex-1 text-sm"
+                    style={{ color: C.ink }}
+                  />
+                </div>
+
+                <div className="flex items-center gap-1 rounded-full p-1 w-fit" style={{ background: C.surfaceLight, border: `1px solid ${C.border}` }}>
+                  {[
+                    { key: 'ohne', label: 'Ohne Autogramm' },
+                    { key: 'mit', label: 'Mit Autogramm' },
+                    { key: 'beide', label: 'Beide zeigen' },
+                  ].map(({ key, label }) => (
+                    <button
+                      key={key}
+                      onClick={() => setBulkAuto(key)}
+                      className="px-3 py-1 rounded-full text-xs font-semibold"
+                      style={{ background: bulkAuto === key ? C.red : 'transparent', color: bulkAuto === key ? '#FFFCF2' : C.muted }}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+
+                {REFRACTOR_TIERS.find((t) => t.name === bulkRarity)?.print > 1 && !bulkPlayerSearch.trim() && (
+                  <div style={{ color: C.muted, fontSize: '10px', marginTop: '-6px' }}>
+                    Tipp: Spieler suchen, um alle {REFRACTOR_TIERS.find((t) => t.name === bulkRarity)?.print} einzelnen Exemplare (1/{REFRACTOR_TIERS.find((t) => t.name === bulkRarity)?.print} – {REFRACTOR_TIERS.find((t) => t.name === bulkRarity)?.print}/{REFRACTOR_TIERS.find((t) => t.name === bulkRarity)?.print}) einzeln abzuhaken.
+                  </div>
+                )}
 
                 <div className="flex items-center justify-between">
                   <span style={{ color: C.muted, fontSize: '11px' }}>{bulkList.length} Karten in dieser Auswahl</span>
@@ -1311,7 +1548,21 @@ export default function KartenboxPrototype() {
               <div className="flex justify-between"><span style={{ color: C.muted }}>Set</span><span>{setById(selectedEntry.setId)?.name}</span></div>
               <div className="flex justify-between"><span style={{ color: C.muted }}>Hersteller</span><span>{setById(selectedEntry.setId)?.manufacturer}</span></div>
               <div className="flex justify-between"><span style={{ color: C.muted }}>Seltenheit</span><span>{selectedEntry.rarity}{selectedEntry.auto && !selectedEntry.rarity.includes('Autograph') ? ' · Autograph' : ''}{selectedEntry.rookie ? ' · Rookie Card' : ''}</span></div>
-              <div className="flex justify-between"><span style={{ color: C.muted }}>Auflage</span><span>#{String(selectedEntry.num).padStart(3, '0')}/{selectedEntry.print}</span></div>
+              <div className="flex justify-between"><span style={{ color: C.muted }}>Auflage</span><span>{formatSerial(selectedEntry)}</span></div>
+              {ownedMap[selectedEntry.id] && selectedEntry.rarity !== 'Base' && selectedEntry.num == null && (
+                <div className="flex items-center gap-2 mt-1">
+                  <span style={{ color: C.muted, fontSize: '11px', flexShrink: 0 }}>Gezogene Seriennummer eintragen</span>
+                  <input
+                    type="number"
+                    min="1"
+                    max={selectedEntry.print || undefined}
+                    placeholder="z. B. 21"
+                    onChange={(e) => updateSerialNum(selectedEntry.id, e.target.value)}
+                    className="px-2 py-1 rounded text-xs flex-1"
+                    style={{ background: C.surfaceLight, border: `1px solid ${C.border}`, color: C.ink }}
+                  />
+                </div>
+              )}
               {ownedMap[selectedEntry.id] && (
                 <div className="flex justify-between"><span style={{ color: C.muted }}>Zustand</span><span>{ownedMap[selectedEntry.id].cond}</span></div>
               )}
