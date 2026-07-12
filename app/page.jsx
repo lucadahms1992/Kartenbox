@@ -263,7 +263,7 @@ function stickerTilt(id) {
   return (h % 5) - 2; // -2deg .. 2deg
 }
 
-function Card({ entry, owned, onClick }) {
+function Card({ entry, owned, onClick, photo }) {
   const club = CLUBS[entry.club];
   const rs = rarityStyle(entry.rarity, entry.auto);
   const tilt = stickerTilt(entry.id);
@@ -280,6 +280,9 @@ function Card({ entry, owned, onClick }) {
         boxShadow: '2px 3px 6px rgba(28,26,21,0.25)',
       }}
     >
+      {photo && (
+        <img src={photo} alt={entry.player} className="absolute inset-0 w-full h-full object-cover" />
+      )}
       {/* peeled corner */}
       <div
         className="absolute bottom-0 right-0 pointer-events-none"
@@ -302,19 +305,23 @@ function Card({ entry, owned, onClick }) {
           }}
         />
       )}
-      <div style={{ height: '8px', background: `linear-gradient(90deg, ${club.p}, ${club.s})` }} />
-      <div className="flex-1 flex flex-col items-center justify-center px-2 gap-1">
-        <div
-          className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold"
-          style={{ background: club.s, color: '#fff', border: `2px solid ${club.p}` }}
-        >
-          {(() => { const parts = entry.player.split(' '); return parts[parts.length - 1]?.[0] || 'X'; })()}
-        </div>
-        <div className="text-center leading-tight" style={{ color: C.ink, fontFamily: 'Bungee, sans-serif', fontSize: '12px', letterSpacing: '0.2px' }}>
-          {entry.player}
-        </div>
-        <div className="text-[10px]" style={{ color: C.muted, fontFamily: 'Inter, sans-serif' }}>{entry.pos || entry.club.split(' ').slice(-1)[0]} · {entry.season}</div>
-      </div>
+      {!photo && (
+        <>
+          <div style={{ height: '8px', background: `linear-gradient(90deg, ${club.p}, ${club.s})` }} />
+          <div className="flex-1 flex flex-col items-center justify-center px-2 gap-1">
+            <div
+              className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold"
+              style={{ background: club.s, color: '#fff', border: `2px solid ${club.p}` }}
+            >
+              {(() => { const parts = entry.player.split(' '); return parts[parts.length - 1]?.[0] || 'X'; })()}
+            </div>
+            <div className="text-center leading-tight" style={{ color: C.ink, fontFamily: 'Bungee, sans-serif', fontSize: '12px', letterSpacing: '0.2px' }}>
+              {entry.player}
+            </div>
+            <div className="text-[10px]" style={{ color: C.muted, fontFamily: 'Inter, sans-serif' }}>{entry.pos || entry.club.split(' ').slice(-1)[0]} · {entry.season}</div>
+          </div>
+        </>
+      )}
       {owned && owned.isPublic === false && (
         <div
           className="absolute top-2 left-2 w-4 h-4 rounded-full flex items-center justify-center"
@@ -339,12 +346,18 @@ function Card({ entry, owned, onClick }) {
           RC
         </div>
       )}
-      <div className="text-center px-2" style={{ color: C.muted, fontFamily: 'Inter, sans-serif', fontSize: '9px' }}>
-        {setById(entry.setId)?.name}
-      </div>
+      {!photo && (
+        <div className="text-center px-2" style={{ color: C.muted, fontFamily: 'Inter, sans-serif', fontSize: '9px' }}>
+          {setById(entry.setId)?.name}
+        </div>
+      )}
       <div
         className="flex items-center justify-between px-2 py-1"
-        style={{ background: 'rgba(28,26,21,0.08)', fontFamily: '"IBM Plex Mono", monospace', fontSize: '10px', color: C.muted }}
+        style={
+          photo
+            ? { background: 'linear-gradient(to top, rgba(11,10,8,0.85), rgba(11,10,8,0.15))', fontFamily: '"IBM Plex Mono", monospace', fontSize: '10px', color: '#FFFCF2' }
+            : { background: 'rgba(28,26,21,0.08)', fontFamily: '"IBM Plex Mono", monospace', fontSize: '10px', color: C.muted }
+        }
       >
         <span>#{String(entry.num).padStart(3, '0')}/{entry.print}</span>
         {owned && owned.price != null && <span style={{ color: C.gold }}>€{owned.price}</span>}
@@ -372,7 +385,7 @@ function EmptySlot() {
   );
 }
 
-function BinderPages({ entries, ownedMap, onCardClick }) {
+function BinderPages({ entries, ownedMap, onCardClick, photos = {} }) {
   const pages = [];
   for (let i = 0; i < entries.length; i += 9) pages.push(entries.slice(i, i + 9));
   if (pages.length === 0) pages.push([]);
@@ -402,7 +415,7 @@ function BinderPages({ entries, ownedMap, onCardClick }) {
               while (slots.length < 9) slots.push(null);
               return slots.map((entry, idx) =>
                 entry ? (
-                  <Card key={entry.id} entry={entry} owned={ownedMap[entry.id]} onClick={() => onCardClick(entry)} />
+                  <Card key={entry.id} entry={entry} owned={ownedMap[entry.id]} onClick={() => onCardClick(entry)} photo={photos[entry.id]?.front} />
                 ) : (
                   <EmptySlot key={idx} />
                 )
@@ -508,6 +521,30 @@ function SimpleMatchRow({ entry, ownedMap, othersList, onViewCollector }) {
 }
 
 
+function ChecklistRow({ entry, checked, disabled, onToggle }) {
+  const club = CLUBS[entry.club];
+  return (
+    <label
+      className="flex items-center gap-2 px-2 py-1.5 rounded-md text-xs"
+      style={{
+        background: checked ? C.surfaceLight : 'transparent',
+        border: `1px solid ${C.border}`,
+        opacity: disabled ? 0.55 : 1,
+        cursor: disabled ? 'default' : 'pointer',
+      }}
+    >
+      <input type="checkbox" checked={checked} disabled={disabled} onChange={() => onToggle(entry.id)} />
+      <span style={{ width: 8, height: 8, borderRadius: '50%', background: club?.p || C.muted, flexShrink: 0 }} />
+      <span style={{ fontFamily: '"IBM Plex Mono", monospace', color: C.muted, width: '30px', flexShrink: 0 }}>
+        #{String(entry.num).padStart(3, '0')}
+      </span>
+      <span style={{ color: C.ink, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{entry.player}</span>
+      {entry.rarity !== 'Base' && <span style={{ color: C.muted, fontSize: '10px', flexShrink: 0 }}>{entry.rarity}</span>}
+      {disabled && <span style={{ color: C.green, fontSize: '10px', flexShrink: 0 }}>✓ besitzt du</span>}
+    </label>
+  );
+}
+
 function CollectorRow({ u, badge, onClick, myCity }) {
   const sameCity = myCity && u.city && u.city.toLowerCase() === myCity.toLowerCase();
   return (
@@ -585,6 +622,10 @@ export default function KartenboxPrototype() {
   const [filterSet, setFilterSet] = useState('Alle');
   const [search, setSearch] = useState('');
   const [wantQuery, setWantQuery] = useState('');
+  const [addMode, setAddMode] = useState('einzeln');
+  const [bulkSetId, setBulkSetId] = useState(SETS[0].id);
+  const [bulkRarity, setBulkRarity] = useState('Base');
+  const [bulkSelected, setBulkSelected] = useState({});
   const [shuffleSeed, setShuffleSeed] = useState(0);
   const [addForm, setAddForm] = useState({ player: '', season: '2025/26', setId: SETS[0].id, rarity: 'Base', auto: false, price: '', sellPrice: '', isPublic: true });
   const detectedClub = useMemo(() => {
@@ -647,6 +688,44 @@ export default function KartenboxPrototype() {
   function viewCollector(collector) {
     setView('entdecken');
     setSelectedCollector(collector);
+  }
+
+  const bulkList = useMemo(
+    () => CATALOGUE
+      .filter((c) => c.setId === bulkSetId && (bulkRarity === 'Alle' || c.rarity.includes(bulkRarity)))
+      .sort((a, b) => a.num - b.num),
+    [bulkSetId, bulkRarity]
+  );
+  const bulkSelectedCount = Object.values(bulkSelected).filter(Boolean).length;
+
+  function toggleBulk(id) {
+    setBulkSelected((prev) => ({ ...prev, [id]: !prev[id] }));
+  }
+
+  function selectAllVisible() {
+    setBulkSelected((prev) => {
+      const next = { ...prev };
+      bulkList.forEach((c) => { if (!ownedMap[c.id]) next[c.id] = true; });
+      return next;
+    });
+  }
+
+  function deselectAllVisible() {
+    setBulkSelected((prev) => {
+      const next = { ...prev };
+      bulkList.forEach((c) => { delete next[c.id]; });
+      return next;
+    });
+  }
+
+  function submitBulkUpload() {
+    const idsToAdd = bulkList.filter((c) => bulkSelected[c.id] && !ownedMap[c.id]).map((c) => c.id);
+    if (idsToAdd.length === 0) return;
+    setOwned((prev) => [
+      ...prev,
+      ...idsToAdd.map((id) => ({ id, cond: 'Roh / ungeprüft', price: 0, estValue: 0, sellPrice: null, isPublic: true })),
+    ]);
+    setBulkSelected({});
   }
 
   const searchResults = useMemo(() => {
@@ -778,7 +857,7 @@ export default function KartenboxPrototype() {
                 </button>
               )}
             </div>
-            <BinderPages entries={myEntries} ownedMap={ownedMap} onCardClick={setSelectedEntry} />
+            <BinderPages entries={myEntries} ownedMap={ownedMap} onCardClick={setSelectedEntry} photos={photos} />
           </>
         )}
 
@@ -865,36 +944,54 @@ export default function KartenboxPrototype() {
         )}
 
         {view === 'hinzufuegen' && (
-          <div className="flex flex-col gap-6 max-w-lg">
-            <div>
-              <label style={{ color: C.muted, fontSize: '11px' }}>Spieler oder Verein suchen</label>
-              <div className="flex items-center gap-2 mt-1 px-3 py-2 rounded-lg" style={{ background: C.surfaceLight, border: '1px solid #DFC98D' }}>
-                <Search size={14} color={C.muted} />
-                <input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="z. B. Wagner oder Fürth"
-                  className="bg-transparent flex-1 text-sm"
-                  style={{ color: C.ink }}
-                />
-              </div>
+          <div className="flex flex-col gap-5 max-w-lg">
+            <div className="flex items-center gap-1 rounded-full p-1 w-fit" style={{ background: C.surfaceLight, border: `1px solid ${C.border}` }}>
+              {[
+                { key: 'einzeln', label: 'Einzeln hinzufügen' },
+                { key: 'checkliste', label: 'Ganzes Set abhaken' },
+              ].map(({ key, label }) => (
+                <button
+                  key={key}
+                  onClick={() => setAddMode(key)}
+                  className="px-3 py-1.5 rounded-full text-xs font-semibold"
+                  style={{ background: addMode === key ? C.blue : 'transparent', color: addMode === key ? '#FFFCF2' : C.muted }}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
 
-            {searchResults.length > 0 && (
-              <div className="flex flex-col gap-2">
-                {searchResults.map((r) => (
-                  <div key={r.id} className="flex items-center justify-between px-3 py-2 rounded-lg" style={{ background: C.surface, border: '1px solid #E8D9A6' }}>
-                    <div>
-                      <div style={{ color: C.ink, fontSize: '13px' }}>{r.player} · {r.club}</div>
-                      <div style={{ color: C.muted, fontSize: '11px' }}>
-                        {setById(r.setId)?.name} · #{String(r.num).padStart(2, '0')}/{r.print}{r.auto ? ' · Autograph' : ''}
-                      </div>
-                    </div>
-                    {ownedMap[r.id] ? (
-                      <span style={{ color: C.green, fontSize: '11px' }}>Bereits in Sammlung</span>
-                    ) : (
-                      <button
-                        onClick={() => addToCollection(r, 0)}
+            {addMode === 'einzeln' && (
+              <div className="flex flex-col gap-6">
+                <div>
+                  <label style={{ color: C.muted, fontSize: '11px' }}>Spieler oder Verein suchen</label>
+                  <div className="flex items-center gap-2 mt-1 px-3 py-2 rounded-lg" style={{ background: C.surfaceLight, border: '1px solid #DFC98D' }}>
+                    <Search size={14} color={C.muted} />
+                    <input
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      placeholder="z. B. Wagner oder Fürth"
+                      className="bg-transparent flex-1 text-sm"
+                      style={{ color: C.ink }}
+                    />
+                  </div>
+                </div>
+
+                {searchResults.length > 0 && (
+                  <div className="flex flex-col gap-2">
+                    {searchResults.map((r) => (
+                      <div key={r.id} className="flex items-center justify-between px-3 py-2 rounded-lg" style={{ background: C.surface, border: '1px solid #E8D9A6' }}>
+                        <div>
+                          <div style={{ color: C.ink, fontSize: '13px' }}>{r.player} · {r.club}</div>
+                          <div style={{ color: C.muted, fontSize: '11px' }}>
+                            {setById(r.setId)?.name} · #{String(r.num).padStart(2, '0')}/{r.print}{r.auto ? ' · Autograph' : ''}
+                          </div>
+                        </div>
+                        {ownedMap[r.id] ? (
+                          <span style={{ color: C.green, fontSize: '11px' }}>Bereits in Sammlung</span>
+                        ) : (
+                          <button
+                            onClick={() => addToCollection(r, 0)}
                         className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold"
                         style={{ background: C.green, color: C.ink }}
                       >
@@ -995,6 +1092,70 @@ export default function KartenboxPrototype() {
                 Karte zur Sammlung hinzufügen
               </button>
             </div>
+              </div>
+            )}
+
+            {addMode === 'checkliste' && (
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-2">
+                  <select
+                    value={bulkSetId}
+                    onChange={(e) => setBulkSetId(e.target.value)}
+                    className="px-3 py-2 rounded-lg text-sm flex-1"
+                    style={{ background: C.surfaceLight, color: C.ink, border: `1px solid ${C.border}` }}
+                  >
+                    {SETS.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                  </select>
+                  <select
+                    value={bulkRarity}
+                    onChange={(e) => setBulkRarity(e.target.value)}
+                    className="px-3 py-2 rounded-lg text-sm"
+                    style={{ background: C.surfaceLight, color: C.ink, border: `1px solid ${C.border}` }}
+                  >
+                    <option value="Alle">Alle Seltenheiten</option>
+                    {RARITY_ORDER.map((r) => <option key={r} value={r}>{r}</option>)}
+                  </select>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span style={{ color: C.muted, fontSize: '11px' }}>{bulkList.length} Karten in dieser Auswahl</span>
+                  <div className="flex items-center gap-3">
+                    <button onClick={selectAllVisible} style={{ color: C.blue, fontSize: '11px', fontWeight: 600 }}>Alle auswählen</button>
+                    <button onClick={deselectAllVisible} style={{ color: C.muted, fontSize: '11px', fontWeight: 600 }}>Auswahl leeren</button>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1 overflow-y-auto pr-1" style={{ maxHeight: '420px' }}>
+                  {bulkList.map((entry) => (
+                    <ChecklistRow
+                      key={entry.id}
+                      entry={entry}
+                      checked={!!bulkSelected[entry.id] || !!ownedMap[entry.id]}
+                      disabled={!!ownedMap[entry.id]}
+                      onToggle={toggleBulk}
+                    />
+                  ))}
+                  {bulkList.length === 0 && (
+                    <div style={{ color: C.muted, fontSize: '12px', padding: '8px 0' }}>Keine Karten für diese Kombination aus Set und Seltenheit.</div>
+                  )}
+                </div>
+
+                <div
+                  className="sticky bottom-0 flex items-center justify-between px-4 py-3 rounded-lg mt-1"
+                  style={{ background: C.surface, border: `1px solid ${C.border}`, boxShadow: '0 -2px 8px rgba(28,26,21,0.08)' }}
+                >
+                  <span style={{ color: C.ink, fontSize: '12px', fontWeight: 600 }}>{bulkSelectedCount} ausgewählt</span>
+                  <button
+                    disabled={bulkSelectedCount === 0}
+                    onClick={submitBulkUpload}
+                    className="px-4 py-2 rounded-lg text-xs font-semibold"
+                    style={{ background: bulkSelectedCount > 0 ? C.gold : C.border, color: bulkSelectedCount > 0 ? C.ink : C.muted }}
+                  >
+                    {bulkSelectedCount > 0 ? `${bulkSelectedCount} Karten hinzufügen` : 'Karten hinzufügen'}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -1142,7 +1303,7 @@ export default function KartenboxPrototype() {
               <button onClick={() => setSelectedEntry(null)}><X size={16} color={C.muted} /></button>
             </div>
             <div className="w-32 mx-auto mb-4">
-              <Card entry={selectedEntry} owned={ownedMap[selectedEntry.id]} onClick={() => {}} />
+              <Card entry={selectedEntry} owned={ownedMap[selectedEntry.id]} onClick={() => {}} photo={photos[selectedEntry.id]?.front} />
             </div>
             <div className="flex flex-col gap-2 text-xs" style={{ color: C.ink }}>
               <div className="flex justify-between"><span style={{ color: C.muted }}>Verein</span><span>{selectedEntry.club}</span></div>
