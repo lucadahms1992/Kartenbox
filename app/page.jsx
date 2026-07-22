@@ -939,6 +939,11 @@ function AuthScreen({ mode, setMode, email, setEmail, password, setPassword, err
           </div>
         )}
       </div>
+
+      <div className="flex items-center gap-4 mt-5">
+        <a href="/impressum" style={{ color: C.muted, fontSize: '11px', textDecoration: 'none' }}>Impressum</a>
+        <a href="/datenschutz" style={{ color: C.muted, fontSize: '11px', textDecoration: 'none' }}>Datenschutz</a>
+      </div>
     </div>
   );
 }
@@ -2000,6 +2005,11 @@ export default function KartenboxPrototype() {
           </div>
         )}
       </div>
+
+      <footer className="max-w-5xl mx-auto px-3 sm:px-5 py-6 flex items-center gap-4" style={{ borderTop: `1px solid ${C.border}` }}>
+        <a href="/impressum" style={{ color: C.muted, fontSize: '11px', textDecoration: 'none' }}>Impressum</a>
+        <a href="/datenschutz" style={{ color: C.muted, fontSize: '11px', textDecoration: 'none' }}>Datenschutz</a>
+      </footer>
 
       {/* Detail modal */}
       {selectedEntry && (
