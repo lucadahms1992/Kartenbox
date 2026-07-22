@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
-import { Search, Plus, Users, X, Trash2, ChevronLeft, Sparkles, LayoutGrid, ShieldCheck, Lock, Camera, MapPin, User } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { supabase } from '../lib/supabaseClient';
+import { Search, Plus, Users, X, Trash2, ChevronLeft, Sparkles, LayoutGrid, ShieldCheck, Lock, Camera, MapPin, User, LogOut, Mail, KeyRound } from 'lucide-react';
 
 const C = {
   bg: '#F1E7C6',
@@ -686,34 +687,258 @@ function CollectorRow({ u, badge, onClick, myCity }) {
   );
 }
 
+function AuthScreen({ mode, setMode, email, setEmail, password, setPassword, error, busy, onSubmit }) {
+  return (
+    <div style={{ background: C.bg, minHeight: '100vh' }} className="w-full flex items-center justify-center px-4">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;500;600;700&display=swap');
+      `}</style>
+      <div className="w-full max-w-sm rounded-2xl p-6" style={{ background: C.surface, border: `1px solid ${C.border}` }}>
+        <div className="flex items-center justify-center gap-2 mb-6">
+          <div style={{ width: 12, height: 12, borderRadius: '50%', background: `radial-gradient(circle at 35% 30%, #fff, ${C.ink} 75%)`, border: `1.5px solid ${C.ink}` }} />
+          <span style={{ fontFamily: 'Bungee, sans-serif', fontSize: '22px' }}>
+            <span style={{ color: C.red }}>KARTEN</span><span style={{ color: C.blue }}>BOX</span>
+          </span>
+        </div>
+
+        <div className="flex items-center gap-1 rounded-full p-1 mb-5" style={{ background: C.surfaceLight, border: `1px solid ${C.border}` }}>
+          {[{ key: 'login', label: 'Anmelden' }, { key: 'signup', label: 'Registrieren' }].map(({ key, label }) => (
+            <button
+              key={key}
+              onClick={() => setMode(key)}
+              className="flex-1 py-1.5 rounded-full text-xs font-semibold"
+              style={{ background: mode === key ? C.blue : 'transparent', color: mode === key ? '#FFFCF2' : C.muted }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        <form onSubmit={onSubmit} className="flex flex-col gap-3">
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: C.surfaceLight, border: `1px solid ${C.border}` }}>
+            <Mail size={14} color={C.muted} />
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="E-Mail-Adresse"
+              className="bg-transparent flex-1 text-sm"
+              style={{ color: C.ink }}
+            />
+          </div>
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: C.surfaceLight, border: `1px solid ${C.border}` }}>
+            <KeyRound size={14} color={C.muted} />
+            <input
+              type="password"
+              required
+              minLength={6}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Passwort (mind. 6 Zeichen)"
+              className="bg-transparent flex-1 text-sm"
+              style={{ color: C.ink }}
+            />
+          </div>
+
+          {error && (
+            <div style={{ color: error.startsWith('Bestätigungs') ? C.green : C.danger, fontSize: '11px' }}>{error}</div>
+          )}
+
+          <button
+            type="submit"
+            disabled={busy}
+            className="mt-1 w-full py-2 rounded-lg text-sm font-semibold"
+            style={{ background: C.gold, color: C.ink, opacity: busy ? 0.6 : 1 }}
+          >
+            {busy ? 'Einen Moment...' : mode === 'signup' ? 'Konto erstellen' : 'Anmelden'}
+          </button>
+        </form>
+
+        {mode === 'signup' && (
+          <div style={{ color: C.muted, fontSize: '10px', marginTop: '10px', textAlign: 'center' }}>
+            Nach der Registrierung bekommst du eine Bestätigungs-Mail — erst danach kannst du dich anmelden.
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function KartenboxPrototype() {
   const [view, setView] = useState('sammlung');
+  const [session, setSession] = useState(undefined); // undefined = wird noch geprüft
+  const [authLoading, setAuthLoading] = useState(true);
+  const [dataLoading, setDataLoading] = useState(false);
+  const [authMode, setAuthMode] = useState('login');
+  const [authEmail, setAuthEmail] = useState('');
+  const [authPassword, setAuthPassword] = useState('');
+  const [authError, setAuthError] = useState('');
+  const [authBusy, setAuthBusy] = useState(false);
+  const [profileSaved, setProfileSaved] = useState(false);
   const [profile, setProfile] = useState({
-    firstName: 'Luca',
-    lastName: 'Dahms',
-    username: 'CardCollector92',
-    city: 'Schweinfurt',
-    favoriteClub: 'SpVgg Greuther Fürth',
+    firstName: '',
+    lastName: '',
+    username: '',
+    city: '',
+    favoriteClub: Object.keys(CLUBS)[0],
     bio: '',
     isPublic: true,
     showRealName: false,
   });
   const [selectedEntry, setSelectedEntry] = useState(null);
   const [selectedCollector, setSelectedCollector] = useState(null);
-  const [owned, setOwned] = useState(MY_OWNED);
+  const [owned, setOwned] = useState([]);
   const [photos, setPhotos] = useState({});
 
-  function handlePhotoCapture(cardId, side, file) {
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      setPhotos((prev) => ({ ...prev, [cardId]: { ...prev[cardId], [side]: reader.result } }));
-    };
-    reader.readAsDataURL(file);
+  // Session prüfen + auf Änderungen (Login/Logout) reagieren
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session);
+      setAuthLoading(false);
+    });
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      setSession(newSession);
+    });
+    return () => listener.subscription.unsubscribe();
+  }, []);
+
+  // Profil, Sammlung und gemeinsame Custom-Karten aus der Datenbank laden, sobald eingeloggt
+  useEffect(() => {
+    if (!session) {
+      setOwned([]);
+      setPhotos({});
+      return;
+    }
+    let cancelled = false;
+    setDataLoading(true);
+    (async () => {
+      let { data: profileRow } = await supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+      if (!profileRow) {
+        const defaults = {
+          id: session.user.id,
+          first_name: '',
+          last_name: '',
+          username: session.user.email.split('@')[0],
+          city: '',
+          favorite_club: Object.keys(CLUBS)[0],
+          bio: '',
+          is_public: true,
+          show_real_name: false,
+        };
+        const { data: inserted } = await supabase.from('profiles').insert(defaults).select().single();
+        profileRow = inserted;
+      }
+
+      const { data: customRows } = await supabase.from('custom_cards').select('*');
+      (customRows || []).forEach((c) => {
+        if (!CATALOGUE.find((existing) => existing.id === c.id)) {
+          CATALOGUE.push({
+            id: c.id, player: c.player, club: c.club, pos: '', season: c.season,
+            setId: c.set_id, rarity: c.rarity, num: c.num, baseNum: c.base_num, print: c.print, auto: c.auto,
+          });
+        }
+      });
+
+      const { data: ownedRows } = await supabase.from('owned_cards').select('*').eq('user_id', session.user.id);
+      (ownedRows || []).forEach((r) => {
+        if (r.serial_num != null) {
+          const entry = CATALOGUE.find((c) => c.id === r.card_id);
+          if (entry) entry.num = r.serial_num;
+        }
+      });
+
+      if (cancelled) return;
+      setProfile({
+        firstName: profileRow.first_name || '',
+        lastName: profileRow.last_name || '',
+        username: profileRow.username || '',
+        city: profileRow.city || '',
+        favoriteClub: profileRow.favorite_club || Object.keys(CLUBS)[0],
+        bio: profileRow.bio || '',
+        isPublic: profileRow.is_public,
+        showRealName: profileRow.show_real_name,
+      });
+      setOwned((ownedRows || []).map((r) => ({
+        id: r.card_id,
+        cond: r.cond,
+        price: r.price,
+        estValue: r.est_value,
+        sellPrice: r.sell_price,
+        isPublic: r.is_public,
+      })));
+      const photoMap = {};
+      (ownedRows || []).forEach((r) => {
+        if (r.front_photo_url || r.back_photo_url) {
+          photoMap[r.card_id] = { front: r.front_photo_url, back: r.back_photo_url };
+        }
+      });
+      setPhotos(photoMap);
+      setDataLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, [session?.user?.id]);
+
+  async function handleAuthSubmit(e) {
+    e.preventDefault();
+    setAuthError('');
+    setAuthBusy(true);
+    try {
+      if (authMode === 'signup') {
+        const { error } = await supabase.auth.signUp({ email: authEmail, password: authPassword });
+        if (error) throw error;
+        setAuthError('Bestätigungs-Mail verschickt — bitte Posteingang prüfen und den Link klicken, dann kannst du dich anmelden.');
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({ email: authEmail, password: authPassword });
+        if (error) throw error;
+      }
+    } catch (err) {
+      setAuthError(err.message || 'Etwas ist schiefgelaufen.');
+    } finally {
+      setAuthBusy(false);
+    }
   }
 
-  function removePhoto(cardId, side) {
+  async function handleSignOut() {
+    await supabase.auth.signOut();
+    setView('sammlung');
+  }
+
+  async function saveProfile() {
+    if (!session) return;
+    await supabase.from('profiles').update({
+      first_name: profile.firstName,
+      last_name: profile.lastName,
+      username: profile.username,
+      city: profile.city,
+      favorite_club: profile.favoriteClub,
+      bio: profile.bio,
+      is_public: profile.isPublic,
+      show_real_name: profile.showRealName,
+    }).eq('id', session.user.id);
+    setProfileSaved(true);
+    setTimeout(() => setProfileSaved(false), 2000);
+  }
+
+  async function handlePhotoCapture(cardId, side, file) {
+    if (!file) return;
+    const previewUrl = URL.createObjectURL(file);
+    setPhotos((prev) => ({ ...prev, [cardId]: { ...prev[cardId], [side]: previewUrl } }));
+    if (!session) return;
+    const path = `${session.user.id}/${cardId}-${side}-${Date.now()}.jpg`;
+    const { error } = await supabase.storage.from('card-photos').upload(path, file, { upsert: true });
+    if (error) { console.error('Foto-Upload fehlgeschlagen:', error.message); return; }
+    const { data } = supabase.storage.from('card-photos').getPublicUrl(path);
+    setPhotos((prev) => ({ ...prev, [cardId]: { ...prev[cardId], [side]: data.publicUrl } }));
+    const column = side === 'front' ? 'front_photo_url' : 'back_photo_url';
+    await supabase.from('owned_cards').update({ [column]: data.publicUrl }).eq('user_id', session.user.id).eq('card_id', cardId);
+  }
+
+  async function removePhoto(cardId, side) {
     setPhotos((prev) => ({ ...prev, [cardId]: { ...prev[cardId], [side]: null } }));
+    if (!session) return;
+    const column = side === 'front' ? 'front_photo_url' : 'back_photo_url';
+    await supabase.from('owned_cards').update({ [column]: null }).eq('user_id', session.user.id).eq('card_id', cardId);
   }
   const [filterClub, setFilterClub] = useState('Alle');
   const [filterRarity, setFilterRarity] = useState('Alle');
@@ -868,7 +1093,7 @@ export default function KartenboxPrototype() {
     });
   }
 
-  function submitBulkUpload() {
+  async function submitBulkUpload() {
     const toAdd = Object.values(bulkSelected).filter((c) => !ownedMap[c.id]);
     if (toAdd.length === 0) return;
     toAdd.forEach((c) => {
@@ -879,6 +1104,11 @@ export default function KartenboxPrototype() {
       ...toAdd.map((c) => ({ id: c.id, cond: 'Roh / ungeprüft', price: 0, estValue: 0, sellPrice: null, isPublic: true })),
     ]);
     setBulkSelected({});
+    if (session) {
+      await supabase.from('owned_cards').insert(
+        toAdd.map((c) => ({ user_id: session.user.id, card_id: c.id, cond: 'Roh / ungeprüft', price: 0, est_value: 0, is_public: true }))
+      );
+    }
   }
 
   const searchResults = useMemo(() => {
@@ -895,33 +1125,74 @@ export default function KartenboxPrototype() {
     });
   }, [search]);
 
-  function addToCollection(entry, price) {
+  async function addToCollection(entry, price) {
     if (ownedMap[entry.id]) return;
-    setOwned((prev) => [...prev, { id: entry.id, cond: 'Roh / ungeprüft', price: Number(price) || 0, estValue: Number(price) || 0, sellPrice: null, isPublic: true }]);
+    const row = { id: entry.id, cond: 'Roh / ungeprüft', price: Number(price) || 0, estValue: Number(price) || 0, sellPrice: null, isPublic: true };
+    setOwned((prev) => [...prev, row]);
+    if (session) {
+      await supabase.from('owned_cards').insert({
+        user_id: session.user.id, card_id: entry.id, cond: row.cond, price: row.price, est_value: row.estValue, sell_price: null, is_public: true,
+      });
+    }
   }
 
-  function removeFromCollection(id) {
+  async function removeFromCollection(id) {
     setOwned((prev) => prev.filter((o) => o.id !== id));
     setSelectedEntry(null);
+    if (session) await supabase.from('owned_cards').delete().eq('user_id', session.user.id).eq('card_id', id);
   }
 
-  function togglePublic(id) {
-    setOwned((prev) => prev.map((o) => (o.id === id ? { ...o, isPublic: !o.isPublic } : o)));
+  async function togglePublic(id) {
+    let newVal = true;
+    setOwned((prev) => prev.map((o) => {
+      if (o.id !== id) return o;
+      newVal = !o.isPublic;
+      return { ...o, isPublic: newVal };
+    }));
+    if (session) await supabase.from('owned_cards').update({ is_public: newVal }).eq('user_id', session.user.id).eq('card_id', id);
   }
 
-  function updateSellPrice(id, value) {
-    setOwned((prev) => prev.map((o) => (o.id === id ? { ...o, sellPrice: value === '' ? null : Number(value) } : o)));
+  async function updateSellPrice(id, value) {
+    const sellPrice = value === '' ? null : Number(value);
+    setOwned((prev) => prev.map((o) => (o.id === id ? { ...o, sellPrice } : o)));
+    if (session) await supabase.from('owned_cards').update({ sell_price: sellPrice }).eq('user_id', session.user.id).eq('card_id', id);
   }
 
-  function updateSerialNum(id, value) {
+  async function updateSerialNum(id, value) {
     const entry = CATALOGUE.find((c) => c.id === id);
     if (!entry) return;
-    entry.num = value === '' ? null : Number(value);
-    setSelectedEntry((prev) => (prev && prev.id === id ? { ...prev, num: entry.num } : prev));
+    const num = value === '' ? null : Number(value);
+    entry.num = num;
+    setSelectedEntry((prev) => (prev && prev.id === id ? { ...prev, num } : prev));
+    if (session) await supabase.from('owned_cards').update({ serial_num: num }).eq('user_id', session.user.id).eq('card_id', id);
   }
 
   const clubOptions = ['Alle', ...Object.keys(CLUBS)];
   const rarityOptions = ['Alle', ...RARITY_ORDER];
+
+  if (authLoading) {
+    return (
+      <div style={{ background: C.bg, minHeight: '100vh' }} className="w-full flex items-center justify-center">
+        <span style={{ fontFamily: 'Inter, sans-serif', color: C.muted, fontSize: '13px' }}>Lädt...</span>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return (
+      <AuthScreen
+        mode={authMode}
+        setMode={setAuthMode}
+        email={authEmail}
+        setEmail={setAuthEmail}
+        password={authPassword}
+        setPassword={setAuthPassword}
+        error={authError}
+        busy={authBusy}
+        onSubmit={handleAuthSubmit}
+      />
+    );
+  }
 
   return (
     <div style={{ background: C.bg, minHeight: '100%', fontFamily: 'Inter, sans-serif' }} className="w-full">
@@ -1279,15 +1550,27 @@ export default function KartenboxPrototype() {
               )}
               <button
                 disabled={!addForm.player.trim()}
-                onClick={() => {
+                onClick={async () => {
                   const id = 'custom-' + Date.now();
                   const isBase = addForm.rarity === 'Base';
                   const num = isBase ? CATALOGUE.length + 1 : (Number(addForm.serialNum) || 1);
                   const print = isBase ? 100 : (Number(addForm.serialTotal) || FIXED_PRINT_RUNS[addForm.rarity] || 1);
-                  CATALOGUE.push({ id, player: addForm.player, club: detectedClub || 'Unbekannter Verein', pos: '', season: addForm.season, setId: addForm.setId, rarity: addForm.rarity, num, print, auto: addForm.auto });
-                  setOwned((prev) => [...prev, { id, cond: 'Roh / ungeprüft', price: Number(addForm.price) || 0, estValue: Number(addForm.price) || 0, sellPrice: addForm.sellPrice === '' ? null : Number(addForm.sellPrice), isPublic: addForm.isPublic }]);
+                  const newCard = { id, player: addForm.player, club: detectedClub || 'Unbekannter Verein', pos: '', season: addForm.season, setId: addForm.setId, rarity: addForm.rarity, num, print, auto: addForm.auto };
+                  CATALOGUE.push(newCard);
+                  const price = Number(addForm.price) || 0;
+                  const sellPrice = addForm.sellPrice === '' ? null : Number(addForm.sellPrice);
+                  setOwned((prev) => [...prev, { id, cond: 'Roh / ungeprüft', price, estValue: price, sellPrice, isPublic: addForm.isPublic }]);
                   setAddForm({ player: '', season: '2025/26', setId: SETS[0].id, rarity: 'Base', serialNum: '', serialTotal: '', auto: false, price: '', sellPrice: '', isPublic: true });
                   setSearch('');
+                  if (session) {
+                    await supabase.from('custom_cards').insert({
+                      id, player: newCard.player, club: newCard.club, season: newCard.season, set_id: newCard.setId,
+                      rarity: newCard.rarity, num: newCard.num, print: newCard.print, auto: newCard.auto, created_by: session.user.id,
+                    });
+                    await supabase.from('owned_cards').insert({
+                      user_id: session.user.id, card_id: id, cond: 'Roh / ungeprüft', price, est_value: price, sell_price: sellPrice, is_public: addForm.isPublic,
+                    });
+                  }
                 }}
                 className="mt-3 w-full py-2 rounded-lg text-sm font-semibold"
                 style={{ background: addForm.player.trim() ? C.gold : '#DFC98D', color: addForm.player.trim() ? C.ink : C.muted }}
@@ -1518,6 +1801,23 @@ export default function KartenboxPrototype() {
               <div style={{ color: C.muted, fontSize: '10px', marginTop: '8px' }}>
                 Einzelne Karten kannst du unabhängig davon über "Öffentlich sichtbar" in der Kartenansicht ausblenden.
               </div>
+            </div>
+
+            <div className="flex items-center gap-3 pt-2" style={{ borderTop: `1px solid ${C.border}` }}>
+              <button
+                onClick={saveProfile}
+                className="px-4 py-2 rounded-lg text-sm font-semibold mt-4"
+                style={{ background: C.gold, color: C.ink }}
+              >
+                {profileSaved ? 'Gespeichert ✓' : 'Profil speichern'}
+              </button>
+              <button
+                onClick={handleSignOut}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold mt-4"
+                style={{ background: 'transparent', border: `1px solid ${C.danger}`, color: C.danger }}
+              >
+                <LogOut size={14} /> Abmelden
+              </button>
             </div>
           </div>
         )}
