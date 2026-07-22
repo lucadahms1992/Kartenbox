@@ -38,6 +38,8 @@ const CLUBS = {
   'VfB Stuttgart': { p: '#E30613', s: '#FFFFFF' },
   'VfL Wolfsburg': { p: '#65B32E', s: '#FFFFFF' },
   'SpVgg Greuther Fürth': { p: '#00612E', s: '#FFFFFF' },
+  'FC Schalke 04': { p: '#004D9D', s: '#FFFFFF' },
+  '1. FC Kaiserslautern': { p: '#DD0000', s: '#FFFFFF' },
 };
 
 // Echte Seltenheiten/Parallel-Bezeichnungen aus der 2025-26 Topps Chrome Bundesliga Checkliste
@@ -70,6 +72,8 @@ const RARITY_ORDER = [
   'Shadow Etch',
   'Anime',
   'All-Etch Rookie Rush',
+  "Let's Go",
+  'Meisterschale',
 ];
 
 // Farbe je Parallel-Familie fürs Karten-Rahmen-Styling — orientiert an der echten Refractor-Farbe.
@@ -99,6 +103,14 @@ const FIXED_PRINT_RUNS = {
   'Black Refractor': 10,
   'Red Refractor': 5,
   'SuperFractor': 1,
+  'Aqua Wave Refractor': 199,
+  'Blue Wave Refractor': 150,
+  'Green Wave Refractor': 99,
+  'Purple Wave Refractor': 75,
+  'Gold Wave Refractor': 50,
+  'Orange Wave Refractor': 25,
+  'Black Wave Refractor': 10,
+  'Red Wave Refractor': 5,
 };
 
 // Größte Anbieter für Fußball-Sammelkarten + ihre wichtigsten Sets der letzten Saisons.
@@ -260,6 +272,14 @@ const REFRACTOR_TIERS = [
   { name: 'FrozenFractor', print: null },
 ];
 
+// Wave Refractor: Hobby-exklusive Parallele zu jeder Farbstufe, gleiche Auflage wie die
+// jeweilige Basis-Farbe (ToppsFractor, SuperFractor und FrozenFractor haben keine Wave-Version).
+const WAVE_TIERS = REFRACTOR_TIERS
+  .filter((t) => !['ToppsFractor', 'SuperFractor', 'FrozenFractor'].includes(t.name))
+  .map((t) => ({ name: `${t.name.replace(' Refractor', '')} Wave Refractor`, print: t.print }));
+
+const ALL_NUMBERED_TIERS = [...REFRACTOR_TIERS, ...WAVE_TIERS];
+
 function expandParallels(baseCards, tiers) {
   const out = [];
   baseCards.forEach((card) => {
@@ -278,13 +298,171 @@ function expandParallels(baseCards, tiers) {
   return out;
 }
 
-const CATALOGUE = [...HARRY_KANE_AUTO, ...BASE_CARDS, ...expandParallels(BASE_CARDS, REFRACTOR_TIERS)];
+// Insert-Sets — eigenständige Auswahl-Karten (nicht alle 100 Spieler), echte Checklisten aus
+// derselben Quelle (checklistinsider.com, Stand 07.05.2026).
+const INSERT_SETS = {
+  Electrified: { print: 20, cards: [
+    ['Alexander Røssing-Lelesiit', 'Hamburger SV'], ['Daniel Svensson', 'Borussia Dortmund'],
+    ['Finn Jeltsch', 'VfB Stuttgart'], ['Tidiam Gomis', 'RB Leipzig'],
+    ['Aaron Anselmino', 'Borussia Dortmund'], ['Axel Tape', 'Bayer 04 Leverkusen'],
+    ['Leon Avdullahu', 'TSG 1899 Hoffenheim'], ['Fabio Balde', 'Hamburger SV'],
+    ['Cyriaque Irié', 'SC Freiburg'], ['Christian Kofane', 'Bayer 04 Leverkusen'],
+    ['Rômulo Cardoso', 'RB Leipzig'], ['Chema', 'VfB Stuttgart'],
+    ['Ezechiel Banzuzi', 'RB Leipzig'], ['Ousmane Diallo', 'Borussia Dortmund'],
+    ['Karim Coulibaly', 'SV Werder Bremen'], ['Lazar Jovanović', 'VfB Stuttgart'],
+    ['Jens Castrop', 'Borussia Mönchengladbach'], ['Mio Backhaus', 'SV Werder Bremen'],
+    ['Ezequiel Fernández', 'Bayer 04 Leverkusen'], ['Rav van den Berg', '1. FC Köln'],
+  ]},
+  Illumination: { print: 20, cards: [
+    ['Christian Pulisic', 'Borussia Dortmund'], ['Edin Džeko', 'VfL Wolfsburg'],
+    ['Mario Gómez', 'VfB Stuttgart'], ['Vincent Kompany', 'Hamburger SV'],
+    ['Henrikh Mkhitaryan', 'Borussia Dortmund'], ['Oliver Kahn', 'FC Bayern München'],
+    ['Lothar Matthäus', 'FC Bayern München'], ['Bastian Schweinsteiger', 'FC Bayern München'],
+    ['Ousmane Dembélé', 'Borussia Dortmund'], ['Kai Havertz', 'Bayer 04 Leverkusen'],
+    ['Alexander Meier', 'Eintracht Frankfurt'], ['Sergej Barbarez', 'Hamburger SV'],
+    ['Javi Martínez', 'FC Bayern München'], ['Dimitar Berbatov', 'Bayer 04 Leverkusen'],
+    ['Owen Hargreaves', 'FC Bayern München'], ['Demba Ba', 'TSG 1899 Hoffenheim'],
+    ['Luca Toni', 'FC Bayern München'], ['Klaas-Jan Huntelaar', 'FC Schalke 04'],
+    ['Marko Marin', 'Borussia Mönchengladbach'], ['Mladen Petrić', 'Hamburger SV'],
+  ]},
+  Ornaments: { print: 30, cards: [
+    ['Tom Bischof', 'FC Bayern München'], ['Jonathan Tah', 'FC Bayern München'],
+    ['Ísak Jóhannesson', '1. FC Köln'], ['Tim Lemperle', 'TSG 1899 Hoffenheim'],
+    ['Jean-Luc Dompé', 'Hamburger SV'], ['Christian Eriksen', 'VfL Wolfsburg'],
+    ['Jean-Matteo Bahoya', 'Eintracht Frankfurt'], ['Maximilian Beier', 'Borussia Dortmund'],
+    ['Aaron Zehnter', 'VfL Wolfsburg'], ['Maximilian Mittelstädt', 'VfB Stuttgart'],
+    ['Mathias Pereira Lage', 'FC St. Pauli'], ['Kevin Diks', 'Borussia Mönchengladbach'],
+    ['Exequiel Palacios', 'Bayer 04 Leverkusen'], ['El Chadaille Bitshiabu', 'RB Leipzig'],
+    ['Alejandro Grimaldo', 'Bayer 04 Leverkusen'], ['Malik Tillman', 'Bayer 04 Leverkusen'],
+    ['Mert Kömür', 'FC Augsburg'], ['Antonio Nusa', 'RB Leipzig'],
+    ['Nelson Weiper', '1. FSV Mainz 05'], ['Rocco Reitz', 'Borussia Mönchengladbach'],
+    ['Johan Manzambi', 'SC Freiburg'], ['Ernest Poku', 'Bayer 04 Leverkusen'],
+    ['Ilyas Ansah', '1. FC Union Berlin'], ['Ritsu Doan', 'Eintracht Frankfurt'],
+    ['Eliesse Ben Seghir', 'Bayer 04 Leverkusen'], ['Carney Chukwuemeka', 'Borussia Dortmund'],
+    ['Wouter Burger', 'TSG 1899 Hoffenheim'], ['Serge Gnabry', 'FC Bayern München'],
+    ['Chrislain Matsima', 'FC Augsburg'], ['Farès Chaïbi', 'Eintracht Frankfurt'],
+  ]},
+  Ultrabeam: { print: 30, cards: [
+    ['Eric Martel', '1. FC Köln'], ['Christoph Baumgartner', 'RB Leipzig'],
+    ['Andrija Maksimović', 'RB Leipzig'], ['Arijon Ibrahimović', '1. FC Heidenheim'],
+    ['Albert Lokonga', 'Hamburger SV'], ['Niklas Beste', 'SC Freiburg'],
+    ['Hugo Larsson', 'Eintracht Frankfurt'], ['Felix Nmecha', 'Borussia Dortmund'],
+    ['Jens Stage', 'SV Werder Bremen'], ['Jenson Seelt', 'VfL Wolfsburg'],
+    ['Lorenz Assignon', 'VfB Stuttgart'], ['Oliver Burke', '1. FC Union Berlin'],
+    ['Han-Noah Massengo', 'FC Augsburg'], ['Leon Goretzka', 'FC Bayern München'],
+    ['Bernardo', 'TSG 1899 Hoffenheim'], ['Gregor Kobel', 'Borussia Dortmund'],
+    ['Conrad Harder', 'RB Leipzig'], ['Loïc Bade', 'Bayer 04 Leverkusen'],
+    ['Lukas Ullrich', 'Borussia Mönchengladbach'], ['Deniz Undav', 'VfB Stuttgart'],
+    ['Fabio Silva', 'Borussia Dortmund'], ['Isaac Schmidt', 'SV Werder Bremen'],
+    ['Jae-sung Lee', '1. FSV Mainz 05'], ['Rayan Philippe', 'Hamburger SV'],
+    ['Lucas Vázquez', 'Bayer 04 Leverkusen'], ['Kamil Grabara', 'VfL Wolfsburg'],
+    ['David Raum', 'RB Leipzig'], ['Bilal El Khannouss', 'VfB Stuttgart'],
+    ['Joakim Mæhle', 'VfL Wolfsburg'], ['Dzenan Pejcinovic', 'VfL Wolfsburg'],
+  ]},
+  'Wild Jungle': { print: 16, cards: [
+    ['Alexis Claude-Maurice', 'FC Augsburg'], ['Nnamdi Collins', 'Eintracht Frankfurt'],
+    ['Yussuf Poulsen', 'Hamburger SV'], ['Igor Matanović', 'SC Freiburg'],
+    ['Daniel Svensson', 'Borussia Dortmund'], ['Andrija Maksimović', 'RB Leipzig'],
+    ['Elias Saad', 'FC Augsburg'], ['Andrej Ilić', '1. FC Union Berlin'],
+    ['Danel Sinani', 'FC St. Pauli'], ['Joshua Kimmich', 'FC Bayern München'],
+    ['Jakub Kamiński', '1. FC Köln'], ['Fabio Vieira', 'Hamburger SV'],
+    ['Romano Schmid', 'SV Werder Bremen'], ['Franck Honorat', 'Borussia Mönchengladbach'],
+    ['Adam Hložek', 'TSG 1899 Hoffenheim'], ['Tiago Tomas', 'VfB Stuttgart'],
+  ]},
+  'All-Etch Rookie Rush': { print: 10, cards: [
+    ['Jobe Bellingham', 'Borussia Dortmund'], ['Lennart Karl', 'FC Bayern München'],
+    ['Yan Diomande', 'RB Leipzig'], ['Luka Vušković', 'Hamburger SV'],
+    ['Saïd El Mala', '1. FC Köln'], ['Fisnik Asllani', 'TSG 1899 Hoffenheim'],
+    ['Bazoumana Touré', 'TSG 1899 Hoffenheim'], ['Ernest Poku', 'Bayer 04 Leverkusen'],
+    ['Claudio Echeverri', 'Bayer 04 Leverkusen'], ['Wisdom Mike', 'FC Bayern München'],
+  ]},
+  'Black Spectrum Limited Edition': { print: 25, cards: [
+    ['Ransford-Yeboah Königsdörffer', 'Hamburger SV'], ['Ragnar Ache', '1. FC Köln'],
+    ['Fisnik Asllani', 'TSG 1899 Hoffenheim'], ['Niklas Dorsch', '1. FC Heidenheim'],
+    ['Yuito Suzuki', 'SC Freiburg'], ['Can Uzun', 'Eintracht Frankfurt'],
+    ['Pascal Groß', 'Borussia Dortmund'], ['Romano Schmid', 'SV Werder Bremen'],
+    ['Vinicius Souza', 'VfL Wolfsburg'], ['Lorenz Assignon', 'VfB Stuttgart'],
+    ['Louis Oppie', 'FC St. Pauli'], ['Aleksandar Pavlović', 'FC Bayern München'],
+    ['Tim Kleindienst', 'Borussia Mönchengladbach'], ['Christian Kofane', 'Bayer 04 Leverkusen'],
+    ['Aleix García', 'Bayer 04 Leverkusen'], ['Xaver Schlager', 'RB Leipzig'],
+    ['Ilyas Ansah', '1. FC Union Berlin'], ['Mert Kömür', 'FC Augsburg'],
+    ['Chrislain Matsima', 'FC Augsburg'], ['Benedict Hollerbach', '1. FSV Mainz 05'],
+    ['Rômulo Cardoso', 'RB Leipzig'], ['Konstantinos Koulierakis', 'VfL Wolfsburg'],
+    ['Vincenzo Grifo', 'SC Freiburg'], ['Ibrahim Maza', 'Bayer 04 Leverkusen'],
+    ['Muhammed Damar', 'TSG 1899 Hoffenheim'],
+  ]},
+  Helix: { print: 5, cards: [
+    ['Gerd Müller', 'FC Bayern München'], ['Raúl', 'FC Schalke 04'],
+    ['Michael Ballack', 'FC Bayern München'], ['Uwe Seeler', 'Hamburger SV'],
+    ['Franz Beckenbauer', 'Bayer 04 Leverkusen'],
+  ]},
+  'Shadow Etch': { print: 10, cards: [
+    ['Yan Diomande', 'RB Leipzig'], ['Jefferson Farfán', 'FC Schalke 04'],
+    ['Franz Roth', 'FC Bayern München'], ['Mark van Bommel', 'FC Bayern München'],
+    ['Roberto Firmino', 'TSG 1899 Hoffenheim'], ['Thomas Müller', 'FC Bayern München'],
+    ['Saïd El Mala', '1. FC Köln'], ['Can Uzun', 'Eintracht Frankfurt'],
+    ['Naldo', 'SV Werder Bremen'], ['Philipp Lahm', 'FC Bayern München'],
+  ]},
+  Anime: { print: 5, cards: [
+    ['Harry Kane', 'FC Bayern München'], ['Jamal Musiala', 'FC Bayern München'],
+    ['Jobe Bellingham', 'Borussia Dortmund'], ['Karim Adeyemi', 'Borussia Dortmund'],
+    ['Ritsu Doan', 'Eintracht Frankfurt'],
+  ]},
+  "Let's Go": { print: 15, cards: [
+    ['Johan Bakayoko', 'RB Leipzig'], ['Antonio Nusa', 'RB Leipzig'],
+    ['Malik Tillman', 'Bayer 04 Leverkusen'], ['Lennart Karl', 'FC Bayern München'],
+    ['Paul Nebel', '1. FSV Mainz 05'], ['Jamal Musiala', 'FC Bayern München'],
+    ['Michael Olise', 'FC Bayern München'], ['Harry Kane', 'FC Bayern München'],
+    ['Fabio Vieira', 'Hamburger SV'], ['Angelo Stiller', 'VfB Stuttgart'],
+    ['Jamie Leweling', 'VfB Stuttgart'], ['Serhou Guirassy', 'Borussia Dortmund'],
+    ['Nico Schlotterbeck', 'Borussia Dortmund'], ['Luis Díaz', 'FC Bayern München'],
+    ['Jonathan Burkardt', 'Eintracht Frankfurt'],
+  ]},
+  Meisterschale: { print: 1, cards: [
+    ['Meisterschale', ''],
+  ]},
+};
+
+const CLUB_LOGO_CLUBS = [
+  'FC Augsburg', '1. FC Union Berlin', 'SV Werder Bremen', 'Borussia Dortmund', 'Eintracht Frankfurt',
+  'SC Freiburg', 'Hamburger SV', '1. FC Heidenheim', 'TSG 1899 Hoffenheim', '1. FC Köln', 'RB Leipzig',
+  'Bayer 04 Leverkusen', '1. FSV Mainz 05', 'Borussia Mönchengladbach', 'FC Bayern München',
+  'FC St. Pauli', 'VfB Stuttgart', 'VfL Wolfsburg',
+];
+
+function buildInsertCards() {
+  const out = [];
+  Object.entries(INSERT_SETS).forEach(([setName, { print, cards }]) => {
+    const slug = setName.replace(/[^a-zA-Z]/g, '').toLowerCase();
+    cards.forEach(([player, club], i) => {
+      out.push({
+        id: `insert-${slug}-${i + 1}`, player, club, pos: '', season: '2025/26', setId: 's1',
+        rarity: setName, num: i + 1, print, auto: false,
+      });
+    });
+  });
+  // Club Logo: ein Motiv pro Verein statt pro Spieler, alle als SuperFractor 1/1
+  CLUB_LOGO_CLUBS.forEach((club, i) => {
+    out.push({
+      id: `insert-clublogo-${i + 1}`, player: club, club, pos: '', season: '2025/26', setId: 's1',
+      rarity: 'Club Logo', num: 1, print: 1, auto: false,
+    });
+  });
+  return out;
+}
+
+const CATALOGUE = [
+  ...HARRY_KANE_AUTO,
+  ...BASE_CARDS,
+  ...expandParallels(BASE_CARDS, ALL_NUMBERED_TIERS),
+  ...buildInsertCards(),
+];
 
 // Für die Demo-Sammlung legen wir ein paar konkret gezogene Exemplare an — in der echten App
 // passiert das, sobald ein Nutzer seine Karte hinzufügt bzw. die Seriennummer einträgt.
 function pushKnownSerial(baseId, tierName, serialNum, auto = false) {
   const base = BASE_CARDS.find((c) => c.id === baseId);
-  const tier = REFRACTOR_TIERS.find((t) => t.name === tierName);
+  const tier = ALL_NUMBERED_TIERS.find((t) => t.name === tierName);
   if (!base || !tier) return;
   const slug = tierName.replace(/\s+/g, '').toLowerCase();
   const id = `${baseId}-${slug}-${serialNum}${auto ? '-auto' : ''}`;
@@ -342,7 +520,7 @@ function rarityStyle(rarity, auto) {
   const family = Object.keys(PARALLEL_COLORS).find((key) => rarity.startsWith(key));
   if (family) return { border: `1.5px solid ${PARALLEL_COLORS[family]}`, glow: false };
   if (rarity.includes('Wave')) return { border: `1.5px solid ${C.blue}`, glow: false };
-  if (['Electrified', 'Illumination', 'Ornaments', 'Ultrabeam', 'Wild Jungle', 'Club Logo', 'Black Spectrum Limited Edition', 'Helix', 'Shadow Etch', 'Anime', 'All-Etch Rookie Rush'].some((s) => rarity.startsWith(s))) {
+  if (['Electrified', 'Illumination', 'Ornaments', 'Ultrabeam', 'Wild Jungle', 'Club Logo', 'Black Spectrum Limited Edition', 'Helix', 'Shadow Etch', 'Anime', 'All-Etch Rookie Rush', "Let's Go", 'Meisterschale'].some((s) => rarity.startsWith(s))) {
     return { border: `1.5px dashed ${C.blue}`, glow: false };
   }
   return { border: `1.5px solid rgba(28,26,21,0.3)`, glow: false };
@@ -356,7 +534,7 @@ function stickerTilt(id) {
 }
 
 function Card({ entry, owned, onClick, photo }) {
-  const club = CLUBS[entry.club];
+  const club = CLUBS[entry.club] || { p: C.gold, s: C.ink };
   const rs = rarityStyle(entry.rarity, entry.auto);
   const tilt = stickerTilt(entry.id);
   return (
@@ -614,7 +792,7 @@ function SimpleMatchRow({ entry, ownedMap, othersList, onViewCollector }) {
 
 
 function ChecklistRow({ entry, checked, disabled, onToggle }) {
-  const club = CLUBS[entry.club];
+  const club = CLUBS[entry.club] || { p: C.gold, s: C.ink };
   return (
     <label
       className="flex items-center gap-2 px-2 py-1.5 rounded-md text-xs"
@@ -1028,7 +1206,7 @@ export default function KartenboxPrototype() {
       return rows.sort((a, b) => a.num - b.num);
     }
 
-    const tier = REFRACTOR_TIERS.find((t) => t.name === bulkRarity);
+    const tier = ALL_NUMBERED_TIERS.find((t) => t.name === bulkRarity);
     if (!tier) {
       // Wave Refractor, Insert-Sets, Autograph, 'Alle': noch nicht systematisch generiert —
       // zeige, was dafür schon real im Katalog existiert (z. B. Autogramm-Serie, manuelle Karten).
@@ -1631,9 +1809,9 @@ export default function KartenboxPrototype() {
                   ))}
                 </div>
 
-                {REFRACTOR_TIERS.find((t) => t.name === bulkRarity)?.print > 1 && !bulkPlayerSearch.trim() && (
+                {ALL_NUMBERED_TIERS.find((t) => t.name === bulkRarity)?.print > 1 && !bulkPlayerSearch.trim() && (
                   <div style={{ color: C.muted, fontSize: '10px', marginTop: '-6px' }}>
-                    Tipp: Spieler suchen, um alle {REFRACTOR_TIERS.find((t) => t.name === bulkRarity)?.print} einzelnen Exemplare (1/{REFRACTOR_TIERS.find((t) => t.name === bulkRarity)?.print} – {REFRACTOR_TIERS.find((t) => t.name === bulkRarity)?.print}/{REFRACTOR_TIERS.find((t) => t.name === bulkRarity)?.print}) einzeln abzuhaken.
+                    Tipp: Spieler suchen, um alle {ALL_NUMBERED_TIERS.find((t) => t.name === bulkRarity)?.print} einzelnen Exemplare (1/{ALL_NUMBERED_TIERS.find((t) => t.name === bulkRarity)?.print} – {ALL_NUMBERED_TIERS.find((t) => t.name === bulkRarity)?.print}/{ALL_NUMBERED_TIERS.find((t) => t.name === bulkRarity)?.print}) einzeln abzuhaken.
                   </div>
                 )}
 
@@ -1930,7 +2108,6 @@ export default function KartenboxPrototype() {
                               id={inputId}
                               type="file"
                               accept="image/*"
-                              capture="environment"
                               className="hidden"
                               onChange={(e) => handlePhotoCapture(selectedEntry.id, side, e.target.files?.[0])}
                             />
