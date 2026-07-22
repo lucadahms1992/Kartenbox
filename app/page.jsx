@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { Search, Plus, Users, X, Trash2, ChevronLeft, Sparkles, LayoutGrid, ShieldCheck, Lock, Camera, MapPin, User, LogOut, Mail, KeyRound } from 'lucide-react';
+import { Search, Plus, Users, X, Trash2, ChevronLeft, Sparkles, LayoutGrid, ShieldCheck, Lock, Camera, MapPin, User, LogOut, Mail, KeyRound, Star } from 'lucide-react';
 
 const C = {
   bg: '#F1E7C6',
@@ -485,8 +485,8 @@ pushKnownSerial('tcb2526-101', 'Orange Refractor', 2, true);
 const setById = (id) => SETS.find((s) => s.id === id);
 
 const MY_OWNED = [
-  { id: 'tcb2526-84-goldrefractor-12', cond: 'PSA 10', price: 45, estValue: 68, sellPrice: 60, isPublic: true },
-  { id: 'tcb2526-82-superfractor-1', cond: 'PSA 9', price: 38, estValue: 210, sellPrice: null, isPublic: true },
+  { id: 'tcb2526-84-goldrefractor-12', cond: 'PSA 10', price: 45, estValue: 68, sellPrice: 60, isPublic: true, isFavorite: true },
+  { id: 'tcb2526-82-superfractor-1', cond: 'PSA 9', price: 38, estValue: 210, sellPrice: null, isPublic: true, isFavorite: true },
   { id: 'tcb2526-18-redrefractor-2', cond: 'Roh / ungeprüft', price: 6, estValue: 9, sellPrice: null, isPublic: true },
   { id: 'tcb2526-59-greenrefractor-34', cond: 'PSA 9', price: 12, estValue: 15, sellPrice: 20, isPublic: true },
   { id: 'tcb2526-81-orangerefractor-11', cond: 'Roh / ungeprüft', price: 5, estValue: 6, sellPrice: null, isPublic: true },
@@ -598,6 +598,14 @@ function Card({ entry, owned, onClick, photo }) {
           style={{ background: C.ink, color: '#FFFCF2' }}
         >
           <Lock size={9} />
+        </div>
+      )}
+      {owned && owned.isFavorite && (
+        <div
+          className="absolute bottom-9 left-2 w-5 h-5 rounded-full flex items-center justify-center"
+          style={{ background: C.gold, border: `1px solid ${C.ink}` }}
+        >
+          <Star size={11} color={C.ink} fill={C.ink} />
         </div>
       )}
       {entry.auto && (
@@ -1049,6 +1057,7 @@ export default function KartenboxPrototype() {
         estValue: r.est_value,
         sellPrice: r.sell_price,
         isPublic: r.is_public,
+        isFavorite: r.is_favorite,
       })));
       const photoMap = {};
       (ownedRows || []).forEach((r) => {
@@ -1126,6 +1135,7 @@ export default function KartenboxPrototype() {
   const [filterClub, setFilterClub] = useState('Alle');
   const [filterRarity, setFilterRarity] = useState('Alle');
   const [filterSet, setFilterSet] = useState('Alle');
+  const [filterFavorite, setFilterFavorite] = useState(false);
   const [search, setSearch] = useState('');
   const [wantQuery, setWantQuery] = useState('');
   const [addMode, setAddMode] = useState('einzeln');
@@ -1146,8 +1156,9 @@ export default function KartenboxPrototype() {
     () => CATALOGUE.filter((c) => ownedMap[c.id])
       .filter((c) => filterClub === 'Alle' || c.club === filterClub)
       .filter((c) => filterRarity === 'Alle' || c.rarity.includes(filterRarity))
-      .filter((c) => filterSet === 'Alle' || c.setId === filterSet),
-    [ownedMap, filterClub, filterRarity, filterSet]
+      .filter((c) => filterSet === 'Alle' || c.setId === filterSet)
+      .filter((c) => !filterFavorite || ownedMap[c.id]?.isFavorite),
+    [ownedMap, filterClub, filterRarity, filterSet, filterFavorite]
   );
 
   const totalPurchase = owned.reduce((sum, o) => sum + (Number(o.price) || 0), 0);
@@ -1284,7 +1295,7 @@ export default function KartenboxPrototype() {
     });
     setOwned((prev) => [
       ...prev,
-      ...toAdd.map((c) => ({ id: c.id, cond: 'Roh / ungeprüft', price: 0, estValue: 0, sellPrice: null, isPublic: true })),
+      ...toAdd.map((c) => ({ id: c.id, cond: 'Roh / ungeprüft', price: 0, estValue: 0, sellPrice: null, isPublic: true, isFavorite: false })),
     ]);
     setBulkSelected({});
     if (session) {
@@ -1310,7 +1321,7 @@ export default function KartenboxPrototype() {
 
   async function addToCollection(entry, price) {
     if (ownedMap[entry.id]) return;
-    const row = { id: entry.id, cond: 'Roh / ungeprüft', price: Number(price) || 0, estValue: Number(price) || 0, sellPrice: null, isPublic: true };
+    const row = { id: entry.id, cond: 'Roh / ungeprüft', price: Number(price) || 0, estValue: Number(price) || 0, sellPrice: null, isPublic: true, isFavorite: false };
     setOwned((prev) => [...prev, row]);
     if (session) {
       await supabase.from('owned_cards').insert({
@@ -1333,6 +1344,16 @@ export default function KartenboxPrototype() {
       return { ...o, isPublic: newVal };
     }));
     if (session) await supabase.from('owned_cards').update({ is_public: newVal }).eq('user_id', session.user.id).eq('card_id', id);
+  }
+
+  async function toggleFavorite(id) {
+    let newVal = true;
+    setOwned((prev) => prev.map((o) => {
+      if (o.id !== id) return o;
+      newVal = !o.isFavorite;
+      return { ...o, isFavorite: newVal };
+    }));
+    if (session) await supabase.from('owned_cards').update({ is_favorite: newVal }).eq('user_id', session.user.id).eq('card_id', id);
   }
 
   async function updateSellPrice(id, value) {
@@ -1461,9 +1482,21 @@ export default function KartenboxPrototype() {
                 <option value="Alle">Alle Sets</option>
                 {SETS.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
-              {(filterClub !== 'Alle' || filterRarity !== 'Alle' || filterSet !== 'Alle') && (
+              <button
+                onClick={() => setFilterFavorite((v) => !v)}
+                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold"
+                style={{
+                  background: filterFavorite ? C.gold : C.surfaceLight,
+                  color: filterFavorite ? C.ink : C.muted,
+                  border: `1px solid ${filterFavorite ? C.ink : '#DFC98D'}`,
+                }}
+              >
+                <Star size={12} fill={filterFavorite ? C.ink : 'none'} />
+                Nur Favoriten
+              </button>
+              {(filterClub !== 'Alle' || filterRarity !== 'Alle' || filterSet !== 'Alle' || filterFavorite) && (
                 <button
-                  onClick={() => { setFilterClub('Alle'); setFilterRarity('Alle'); setFilterSet('Alle'); }}
+                  onClick={() => { setFilterClub('Alle'); setFilterRarity('Alle'); setFilterSet('Alle'); setFilterFavorite(false); }}
                   className="text-xs px-2 py-1"
                   style={{ color: C.muted }}
                 >
@@ -1742,7 +1775,7 @@ export default function KartenboxPrototype() {
                   CATALOGUE.push(newCard);
                   const price = Number(addForm.price) || 0;
                   const sellPrice = addForm.sellPrice === '' ? null : Number(addForm.sellPrice);
-                  setOwned((prev) => [...prev, { id, cond: 'Roh / ungeprüft', price, estValue: price, sellPrice, isPublic: addForm.isPublic }]);
+                  setOwned((prev) => [...prev, { id, cond: 'Roh / ungeprüft', price, estValue: price, sellPrice, isPublic: addForm.isPublic, isFavorite: false }]);
                   setAddForm({ player: '', season: '2025/26', setId: SETS[0].id, rarity: 'Base', serialNum: '', serialTotal: '', auto: false, price: '', sellPrice: '', isPublic: true });
                   setSearch('');
                   if (session) {
@@ -2025,7 +2058,18 @@ export default function KartenboxPrototype() {
           >
             <div className="flex items-center justify-between mb-3">
               <span style={{ fontFamily: 'Bungee, sans-serif', color: C.ink, fontSize: '15px' }}>{selectedEntry.player}</span>
-              <button onClick={() => setSelectedEntry(null)}><X size={16} color={C.muted} /></button>
+              <div className="flex items-center gap-2">
+                {ownedMap[selectedEntry.id] && (
+                  <button onClick={() => toggleFavorite(selectedEntry.id)} title="Favorit">
+                    <Star
+                      size={18}
+                      color={ownedMap[selectedEntry.id].isFavorite ? C.gold : C.muted}
+                      fill={ownedMap[selectedEntry.id].isFavorite ? C.gold : 'none'}
+                    />
+                  </button>
+                )}
+                <button onClick={() => setSelectedEntry(null)}><X size={16} color={C.muted} /></button>
+              </div>
             </div>
             <div className="w-32 mx-auto mb-4">
               <Card entry={selectedEntry} owned={ownedMap[selectedEntry.id]} onClick={() => {}} photo={photos[selectedEntry.id]?.front} />
